@@ -1,33 +1,61 @@
-import { Socket } from "socket.io";
-import { GroupsManager } from "./groupController";
+import { Server, Socket } from "socket.io";
+import { redis, pub } from "../config/redis";
 export type Message = {
-  username: string;
+  id: string;
+  name: string;
   text: string;
   uuid: string;
   timestamp: Date;
+  email: string;
 };
 export class MessagesMananger {
-  constructor(public socket: Socket) {
+  constructor(public socket: Socket, public io: Server) {
     this.init();
   }
   init() {
     this.sendMessage();
+    this.receiveMessage();
+    this.getMessages();
   }
   sendMessage() {
-    this.socket.on("sendMessage", (groupId: string, message: Message) => {
-      console.log("sendMessage", message);
-      const groups = GroupsManager.groups;
-      if (groups.has(groupId)) {
-        groups.get(groupId)?.messages.push(message);
-        this.socket.emit("receiveMessage",message);
-        groups.get(groupId)?.members.forEach((memberId) => {
-          console.log(memberId);
-          this.socket.to(memberId).emit("receiveMessage", message);
-        });
+    this.socket.on("sendMessage", async (groupId: string, message: Message) => {
+      const groupsExists = await redis.exists(`group:${groupId}`);
+      if (groupsExists) {
+        await redis.lpush(`group:${groupId}:messages`, JSON.stringify(message));
+        await pub.publish(`group:${groupId}`, JSON.stringify(message));
+        this.socket.emit("receiveMessage", message);
+        this.socket.to(groupId).emit("receiveMessage", message);
       } else {
         console.log(`Group ${groupId} does not exist`);
       }
-      console.log("Current groups:", GroupsManager.groups);
     });
+  }
+  receiveMessage() {
+    pub.on("message", (channel: string, message: string) => {
+      const groupId = channel.split(":")[1];
+      const parsedMessage = JSON.parse(message);
+      this.io.to(groupId).emit("receiveMessage", parsedMessage);
+    });
+  }
+  getMessages() {
+    this.socket.on(
+      "getMessages",
+      async (groupId: string, callback: (messages: Message[]) => void) => {
+        const groupExists = await redis.exists(`group:${groupId}`);
+        if (groupExists) {
+          const messages = await redis.lrange(
+            `group:${groupId}:messages`,
+            0,
+            -1
+          );
+          const parsedMessages = messages.map((message) => JSON.parse(message));
+          parsedMessages.reverse();
+          callback(parsedMessages);
+        } else {
+          console.log(`Group ${groupId} does not exist`);
+          callback([]);
+        }
+      }
+    );
   }
 }
