@@ -13,12 +13,14 @@ async function WebServer() {
   server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
-
   process.on("SIGTERM", () => {
     server.close(() => {
       console.log("Server is closed");
       process.exit(0);
     });
+  });
+  process.on("unhandledRejection", (reason, promise) => {
+    console.error("Unhandled Rejection at:", promise, "reason:", reason);
   });
 }
 
