@@ -44,7 +44,7 @@ SyncCode was created to address the common challenges when  we faced during trad
 ## 🛠️ Local development
 ### Clone the Repository
 
-To get started with SyncXcode, clone the repository to your local machine:
+To get started with SyncCode, clone the repository to your local machine:
 
 ```sh
 git clone https://github.com/ajaysehwal/SyncCode.git
@@ -52,12 +52,12 @@ cd SyncCode
 ```
 ### Run SyncCode in Locally
 ```sh
- yarn install or npm install
- yarn dev or npm run dev
+ yarn sync:install or npm run sync:install
+ yarn sync:dev or npm run sync:dev
 ```
-Now we will add the environment variables in the client/ and server/
+Now we will add the environment variables in the web/ and server/
 
-- Create a .env file in both client and server folder according to .example.env given in both the folders respectively.
+- Create a .env file in both web and server folder according to .example.env given in both the folders respectively.
 
 ## Contact
 
