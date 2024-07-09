@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect } from "react";
 import { Input } from "../ui/input";
 import { useAuth, useSocket } from "@/context";

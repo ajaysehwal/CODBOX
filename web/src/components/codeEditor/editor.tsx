@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import { SubmissionResult, Response } from "../interface";
