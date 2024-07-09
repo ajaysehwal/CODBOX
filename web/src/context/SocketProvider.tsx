@@ -24,6 +24,10 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     if (user) {
       socket.current = io(SERVER_PORT, {
         query: { userId: user?.uid },
+        withCredentials: true,
+        extraHeaders: {
+          "Content-Type": "application/json",
+        },
       });
       socket.current?.on("connect", () => {
         console.log("connected to server");
