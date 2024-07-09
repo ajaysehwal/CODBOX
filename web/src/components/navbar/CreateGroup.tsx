@@ -1,3 +1,4 @@
+"use client";
 import { useAuth, useSocket } from "@/context";
 import { useRouter } from "next/navigation";
 import { useToast } from "../ui/use-toast";

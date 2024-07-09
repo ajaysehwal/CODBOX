@@ -1,3 +1,4 @@
+"use client";
 import { useSocket, useZegoEngine } from "@/context";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "../ui/use-toast";
