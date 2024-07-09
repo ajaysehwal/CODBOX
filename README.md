@@ -50,7 +50,7 @@ To get started with SyncCode, clone the repository to your local machine:
 git clone https://github.com/ajaysehwal/SyncCode.git
 cd SyncCode
 ```
-### Run SyncCode in Locally
+### Run SyncCode Locally
 ```sh
  yarn sync:install or npm run sync:install
  yarn sync:dev or npm run sync:dev

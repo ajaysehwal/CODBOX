@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import Home from "../page";
 import { redirect, useSearchParams, useRouter } from "next/navigation";
-import { useAuth, useSocket } from "@/context";
+import { useAuth, useSocket, useZegoEngine } from "@/context";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { ZegoEngine } from "@/lib/zegocloud";
@@ -12,7 +12,8 @@ const GroupPage: React.FC = () => {
   const socket = useSocket();
   const router = useRouter();
   const { toast } = useToast();
-  const zg = ZegoEngine();
+  const { zegoEngine } = useZegoEngine();
+
   const groupId = searchParams.get("id") as string;
   const { user } = useAuth();
   const Error = (error: string, desc?: string) => {
@@ -36,16 +37,16 @@ const GroupPage: React.FC = () => {
         if (!response.success) {
           Error("Please Join Group by entering token in  join other section");
         } else {
-          if (zg) {
-            await zg.loginRoom(groupId, response.AudioToken, {
+          if (zegoEngine) {
+            await zegoEngine.loginRoom(groupId, response.AudioToken, {
               userID: user?.uid as string,
               userName: user?.email as string,
             });
-            const localStream = await zg.createZegoStream({
+            const localStream = await zegoEngine.createZegoStream({
               camera: { audio: true, video: false },
               audioBitrate: 192,
             });
-            zg.startPublishingStream(`${user?.uid}_stream`, localStream);
+            zegoEngine.startPublishingStream(`${user?.uid}_stream`, localStream);
           }
         }
       }

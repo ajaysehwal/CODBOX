@@ -3,7 +3,7 @@ import React, { useState, useCallback } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useInviteTokenStore } from "@/zustand";
 import { Account, JoinGroup, CreateGroup, LeaveGroup, Invite } from ".";
-import { useAuth, useSocket } from "@/context";
+import { useAuth, useSocket, useZegoEngine } from "@/context";
 import { ZegoEngine } from "@/lib/zegocloud";
 import ZegoLocalStream from "zego-express-engine-webrtc/sdk/code/zh/ZegoLocalStream.web";
 import { User } from "firebase/auth";
@@ -27,23 +27,24 @@ export default function Navbar() {
   const groupId = searchParams.get("id") as string;
   const { token } = useInviteTokenStore();
   const { user } = useAuth();
-  const zg = ZegoEngine();
+  const { zegoEngine } = useZegoEngine();
+
   const [localStream, SetLocalStream] = useState<ZegoLocalStream | null>(null);
   const { toast } = useToast();
   const Join = useCallback(
     async (groupId: string, user: User | null, token: string) => {
-      if (zg && groupId && user) {
+      if (zegoEngine && groupId && user) {
         try {
-          await zg.loginRoom(groupId, token, {
+          await zegoEngine.loginRoom(groupId, token, {
             userID: user?.uid as string,
             userName: user?.email as string,
           });
-          const localStream = await zg.createZegoStream({
+          const localStream = await zegoEngine.createZegoStream({
             camera: { audio: true, video: false },
             audioBitrate: 192,
           });
           SetLocalStream(localStream);
-          zg.startPublishingStream(`${user?.uid}_stream`, localStream);
+          zegoEngine.startPublishingStream(`${user?.uid}_stream`, localStream);
 
           socket?.emit("joinGroup", groupId, user);
         } catch (err) {
@@ -56,7 +57,7 @@ export default function Navbar() {
         }
       }
     },
-    [groupId, zg, groupId]
+    [groupId, zegoEngine, groupId]
   );
   return (
     <header className="flex flex-wrap md:justify-start md:flex-nowrap z-50 w-full h-[10vh]">

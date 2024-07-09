@@ -8,6 +8,9 @@ async function WebServer() {
   const socketprovider = new SocketProvider();
   app.use(express.json());
   const server = http.createServer(app);
+  app.get('/',(req,res)=>{
+     res.status(200).json({status:"synccode server is running."});
+  })
   socketprovider.io.attach(server);
   socketprovider.init();
   server.listen(PORT, () => {

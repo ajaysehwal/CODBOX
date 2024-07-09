@@ -1,4 +1,4 @@
-import { useSocket } from "@/context";
+import { useSocket, useZegoEngine } from "@/context";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "../ui/use-toast";
 import { useState, useCallback } from "react";
@@ -21,7 +21,7 @@ export const LeaveGroup = ({
   const socket = useSocket();
   const { toast } = useToast();
   const [LeaveLoad, setLeaveLoad] = useState<boolean>(true);
-  const zg = ZegoEngine();
+  const { zegoEngine } = useZegoEngine();
 
   const LeaveGroup = useCallback(
     (groupId: string) => {
@@ -48,12 +48,12 @@ export const LeaveGroup = ({
   );
   const VoiceDISCONNECTION = useCallback(
     async (groupId: string) => {
-      if (zg && localStream) {
-        zg.destroyStream(localStream);
-        zg.logoutRoom(groupId);
+      if (zegoEngine && localStream) {
+        zegoEngine.destroyStream(localStream);
+        zegoEngine.logoutRoom(groupId);
       }
     },
-    [localStream, groupId, zg]
+    [localStream, groupId, zegoEngine]
   );
 
   return (

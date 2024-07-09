@@ -1,10 +1,31 @@
 "use client";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { ZegoExpressEngine } from "zego-express-engine-webrtc";
+
 const AppId = process.env.NEXT_PUBLIC_ZEGOCLOUD_APP_ID;
 const Server = process.env.NEXT_PUBLIC_ZEGOCLOUD_SERVER as string;
-export const ZegoEngine = () => {
+
+interface ZegoEngineContextProps {
+  zegoEngine: ZegoExpressEngine | null;
+}
+
+const ZegoEngineContext = createContext<ZegoEngineContextProps | undefined>(undefined);
+
+export const useZegoEngine = () => {
+  const context = useContext(ZegoEngineContext);
+  if (!context) {
+    throw new Error("useZegoEngine must be used within a ZegoEngineProvider");
+  }
+  return context;
+};
+
+interface ZegoEngineProviderProps {
+  children: ReactNode;
+}
+
+export const ZegoEngineProvider = ({ children }: ZegoEngineProviderProps) => {
   const [zegoEngine, setZegoEngine] = useState<ZegoExpressEngine | null>(null);
+
   useEffect(() => {
     const zg = new ZegoExpressEngine(Number(AppId), Server);
     setZegoEngine(zg);
@@ -19,5 +40,10 @@ export const ZegoEngine = () => {
       }
     });
   }, []);
-  return zegoEngine;
+
+  return (
+    <ZegoEngineContext.Provider value={{ zegoEngine }}>
+      {children}
+    </ZegoEngineContext.Provider>
+  );
 };
