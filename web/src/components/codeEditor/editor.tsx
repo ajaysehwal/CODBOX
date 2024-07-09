@@ -15,16 +15,7 @@ import {
   ResizablePanelGroup,
 } from "../ui/resizable";
 import { useSearchParams } from "next/navigation";
-const errorToast = (error: string | undefined) => {
-  const { toast } = useToast();
 
-  return toast({
-    variant: "destructive",
-    title: error,
-    description: "There was a problem with your request.",
-    action: <ToastAction altText="Try again">Try again</ToastAction>,
-  });
-};
 export default function CodeEditor() {
   const searchParams = useSearchParams();
   const [language, setLanguage] = useState<Language>("javascript");
@@ -32,6 +23,7 @@ export default function CodeEditor() {
   const groupId = searchParams.get("id") as string;
   const socket = useSocket();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [code, setCode] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
   const [compileResponse, setCompileResponse] =
@@ -43,6 +35,14 @@ export default function CodeEditor() {
   ) => {
     editorRef.current = editor;
     setupMonaco();
+  };
+  const errorToast = (error: string | undefined) => {
+    return toast({
+      variant: "destructive",
+      title: error,
+      description: "There was a problem with your request.",
+      action: <ToastAction altText="Try again">Try again</ToastAction>,
+    });
   };
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
