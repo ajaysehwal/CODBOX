@@ -1,8 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { SubmissionResult } from "../interface";
-import { Button } from "../ui/button";
-import { X } from "lucide-react";
 export const CodeOutput = ({
   setOpen,
   Loading,

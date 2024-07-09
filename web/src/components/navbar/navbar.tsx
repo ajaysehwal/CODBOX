@@ -4,7 +4,6 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useInviteTokenStore } from "@/zustand";
 import { Account, JoinGroup, CreateGroup, LeaveGroup, Invite } from ".";
 import { useAuth, useSocket, useZegoEngine } from "@/context";
-import { ZegoEngine } from "@/lib/zegocloud";
 import ZegoLocalStream from "zego-express-engine-webrtc/sdk/code/zh/ZegoLocalStream.web";
 import { User } from "firebase/auth";
 import { useToast } from "../ui/use-toast";

@@ -4,7 +4,6 @@ import { useToast } from "../ui/use-toast";
 import { useState, useCallback } from "react";
 import { ToastAction } from "../ui/toast";
 import { Button } from "../ui/button";
-import { ZegoEngine } from "@/lib/zegocloud";
 import ZegoLocalStream from "zego-express-engine-webrtc/sdk/code/zh/ZegoLocalStream.web";
 interface Response {
   success: boolean;

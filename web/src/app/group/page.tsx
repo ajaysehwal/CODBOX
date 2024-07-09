@@ -5,8 +5,6 @@ import { redirect, useSearchParams, useRouter } from "next/navigation";
 import { useAuth, useSocket, useZegoEngine } from "@/context";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
-import { ZegoEngine } from "@/lib/zegocloud";
-
 const GroupPage: React.FC = () => {
   const searchParams = useSearchParams();
   const socket = useSocket();
