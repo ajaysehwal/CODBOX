@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Inter as FontSans } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { AuthProvider, SocketProvider } from "@/context";
+import { AuthProvider, SocketProvider, ZegoEngineProvider } from "@/context";
 import Navbar from "@/components/navbar/navbar";
 import { Toaster } from "@/components/ui/toaster";
 const fontSans = FontSans({
@@ -30,9 +30,11 @@ export default function RootLayout({
       >
         <AuthProvider>
           <SocketProvider>
-            <Navbar />
-            <Toaster />
-            {children}
+            <ZegoEngineProvider>
+              <Navbar />
+              <Toaster />
+              {children}
+            </ZegoEngineProvider>
           </SocketProvider>
         </AuthProvider>
       </body>

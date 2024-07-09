@@ -1,11 +1,9 @@
 import { useAuth, useSocket } from "@/context";
 import { useRouter } from "next/navigation";
 import { useToast } from "../ui/use-toast";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { ToastAction } from "../ui/toast";
 import { Button } from "../ui/button";
-import { ZegoEngine } from "@/lib/zegocloud";
-import ZegoLocalStream from "zego-express-engine-webrtc/sdk/code/zh/ZegoLocalStream.web";
 import { User } from "firebase/auth";
 
 interface Response {
@@ -50,7 +48,7 @@ export const CreateGroup = ({
             }
           }
         );
-      }, 1000);
+      }, 500);
       return () => clearTimeout(id);
     },
     [socket, router]

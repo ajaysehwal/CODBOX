@@ -1,1 +1,65 @@
-![SyncCode](https://socialify.git.ci/ajaysehwal/SyncCode/image?description=1&issues=1&language=1&logo=https%3A%2F%2Fsvgl.app%2Flibrary%2Fnextjs_icon_dark.svg,https://svgl.app/library/expressjs.svg&name=1&owner=AjaySehwal&stargazers=1&theme=Light)
+![SyncCode](https://socialify.git.ci/ajaysehwal/SyncCode/image?description=1&descriptionEditable=SyncCode%3A%20Real-time%20code%20collaboration%20platform.%20Connect%2C%20code%2C%20and%20create%20together%20effortlessly%20with%20integrated%20chat%20and%20voice%20communication%2C%20ensuring%20seamless%20teamwork%20and%20supporting%20beginner%20coders&issues=1&language=1&logo=https%3A%2F%2Fsvgl.app%2Flibrary%2Fnextjs_icon_dark.svg&name=1&pattern=Brick%20Wall&stargazers=1&theme=Light)
+
+<p align="center">
+<img src="https://img.shields.io/github/license/ajaysehwal/SyncCode" />
+<img src="https://img.shields.io/badge/Author-ajaysehwal-orange" />
+</p>
+
+## 💥 Introduction
+
+SyncCode is a dynamic platform designed to enhance your coding experience with real-time collaboration, integrated communication tools, and a fast code compiler.
+
+
+## Features
+- **Real-time Code Collaboration**: Work on the same codebase with your team in real-time, ensuring everyone stays in sync.
+![synccode](assets/readme/synccode_groups.png)
+
+- **Integrated Chat and Voice Communication**: Discuss ideas, troubleshoot issues, and provide feedback without leaving the platform.
+![synccode](assets/readme/synccode_compiler.png)
+
+- **Fast Code Compiler**: Write, test, and debug your code swiftly with our fast compiler, providing immediate feedback for continuous improvement.
+
+## Motive Behind SyncCode
+
+SyncCode was created to address the common challenges when  we faced during traditional coding collaboration. Our aim is to:
+
+- ** Reduce Screen Sharing ** : Unlike traditional methods that rely heavily on screen sharing, SyncCode enables direct interaction with the codebase, making collaboration more efficient and less cumbersome
+- ** Real-time Updates ** : Traditional software often lacks real-time updates, leading to version conflicts and delays. SyncCode ensures all changes are reflected instantly, keeping everyone on the same page
+- ** Educational Tool ** : SyncCode is also an excellent tool for teaching code, allowing students to access and run code in real-time. This hands-on approach enhances learning and provides immediate feedback, making it ideal for educational settings.
+
+## Getting Started
+
+1. **Sign Up**: Create an account on through Google Auth.
+2. **Create or Join a Groups**: Start a new Group or join an existing one.
+3. **Collaborate**: Use our real-time editor and integrated communication tools to work with your team.
+4. **Compile and Test**: Utilize our fast compiler to write, test, and debug your code.
+
+## Tech Stack used in SyncCode
+- [Nextjs](https://nextjs.org/)
+- [Expressjs](https://expressjs.com/) , [Socket.io](https://socket.io/)
+- Aiven  - [cloud redis service ](https://aiven.io/)
+- zegocloud for voice commiuncation - [click here](https://www.zegocloud.com)
+- Judge0 for code compilation
+
+## 🛠️ Local development
+### Clone the Repository
+
+To get started with SyncCode, clone the repository to your local machine:
+
+```sh
+git clone https://github.com/ajaysehwal/SyncCode.git
+cd SyncCode
+```
+### Run SyncCode Locally
+```sh
+ yarn sync:install or npm run sync:install
+ yarn sync:dev or npm run sync:dev
+```
+Now we will add the environment variables in the web/ and server/
+
+- Create a .env file in both web and server folder according to .example.env given in both the folders respectively.
+
+## Contact
+
+For support or inquiries, please contact us at [support@ajaysehwal.dev@gmail.com](mailto:ajaysehwal.dev@gmail.com).
+
