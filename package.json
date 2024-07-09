@@ -1,0 +1,19 @@
+{
+  "name": "synccode",
+  "version": "1.0.0",
+  "private": "true",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "sync:install": "concurrently \"cd web && yarn\" \"cd server && yarn\"",
+    "sync:dev": "concurrently \"yarn run-web\" \"yarn run-server\"",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run-web": "cd web && yarn dev",
+    "run-server": "cd server && yarn dev"
+  },
+  "author": "Ajay Sehwal",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
