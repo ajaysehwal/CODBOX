@@ -19,9 +19,9 @@ interface SocketProviderProps {
 }
 export const SocketProvider = ({ children }: SocketProviderProps) => {
   const socket = useRef<Socket | null>(null);
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   useEffect(() => {
-    if (!loading || user) {
+    if (user) {
       socket.current = io(SERVER_PORT, {
         query: { userId: user?.uid },
       });

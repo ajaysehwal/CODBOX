@@ -5,13 +5,12 @@ import { redirect, useSearchParams, useRouter } from "next/navigation";
 import { useAuth, useSocket, useZegoEngine } from "@/context";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
-const GroupPage: React.FC = () => {
+export default function GroupPage() {
   const searchParams = useSearchParams();
   const socket = useSocket();
   const router = useRouter();
   const { toast } = useToast();
   const { zegoEngine } = useZegoEngine();
-
   const groupId = searchParams.get("id") as string;
   const { user } = useAuth();
   const Error = (error: string, desc?: string) => {
@@ -44,7 +43,10 @@ const GroupPage: React.FC = () => {
               camera: { audio: true, video: false },
               audioBitrate: 192,
             });
-            zegoEngine.startPublishingStream(`${user?.uid}_stream`, localStream);
+            zegoEngine.startPublishingStream(
+              `${user?.uid}_stream`,
+              localStream
+            );
           }
         }
       }
@@ -72,5 +74,4 @@ const GroupPage: React.FC = () => {
     redirect("/");
   }
   return <Home />;
-};
-export default GroupPage;
+}
