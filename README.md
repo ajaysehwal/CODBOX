@@ -7,7 +7,7 @@
 
 ## 💥 Introduction
 
-SyncXcode is a dynamic platform designed to enhance your coding experience with real-time collaboration, integrated communication tools, and a fast code compiler.
+SyncCode is a dynamic platform designed to enhance your coding experience with real-time collaboration, integrated communication tools, and a fast code compiler.
 
 
 ## Features
@@ -23,9 +23,9 @@ SyncXcode is a dynamic platform designed to enhance your coding experience with 
 
 SyncCode was created to address the common challenges when  we faced during traditional coding collaboration. Our aim is to:
 
-- ** Reduce Screen Sharing ** : Unlike traditional methods that rely heavily on screen sharing, SyncXcode enables direct interaction with the codebase, making collaboration more efficient and less cumbersome
-- ** Real-time Updates ** : Traditional software often lacks real-time updates, leading to version conflicts and delays. SyncXcode ensures all changes are reflected instantly, keeping everyone on the same page
-- ** Educational Tool ** : SyncXcode is also an excellent tool for teaching code, allowing students to access and run code in real-time. This hands-on approach enhances learning and provides immediate feedback, making it ideal for educational settings.
+- ** Reduce Screen Sharing ** : Unlike traditional methods that rely heavily on screen sharing, SyncCode enables direct interaction with the codebase, making collaboration more efficient and less cumbersome
+- ** Real-time Updates ** : Traditional software often lacks real-time updates, leading to version conflicts and delays. SyncCode ensures all changes are reflected instantly, keeping everyone on the same page
+- ** Educational Tool ** : SyncCode is also an excellent tool for teaching code, allowing students to access and run code in real-time. This hands-on approach enhances learning and provides immediate feedback, making it ideal for educational settings.
 
 ## Getting Started
 
@@ -58,16 +58,6 @@ cd SyncCode
 Now we will add the environment variables in the client/ and server/
 
 - Create a .env file in both client and server folder according to .example.env given in both the folders respectively.
-
-## Server Environment variables
-![server env](assets/readme/server.env.png)
-
-## Frontend Environment variables
-![frontend env](assets/readme/web.example.env.png)
-
-
-
-
 
 ## Contact
 
