@@ -123,7 +123,7 @@ export default function CodeEditor() {
             theme={theme}
             value={code}
             defaultValue="/**
-                        * syncXcode - A platform for seamless collaboration in coding.
+                        * SyncCode - A platform for seamless collaboration in coding.
                         * Connect, code, and create together in real-time!
                                     */"
             onChange={handleEditorChange}
