@@ -21,7 +21,7 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "SyncCode | Collaborative Coding Made Easy",
+  title: "CodeXF | Collaborative Coding Made Easy",
   description: "Collaborative Coding Made Easy",
 };
 
