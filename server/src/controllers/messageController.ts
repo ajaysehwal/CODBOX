@@ -25,8 +25,6 @@ export class MessagesMananger {
         await pub.publish(`group:${groupId}`, JSON.stringify(message));
         this.socket.emit("receiveMessage", message);
         this.socket.to(groupId).emit("receiveMessage", message);
-      } else {
-        console.log(`Group ${groupId} does not exist`);
       }
     });
   }
@@ -52,7 +50,6 @@ export class MessagesMananger {
           parsedMessages.reverse();
           callback(parsedMessages);
         } else {
-          console.log(`Group ${groupId} does not exist`);
           callback([]);
         }
       }

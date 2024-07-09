@@ -1,9 +1,10 @@
 import { Socket } from "socket.io";
-import { SocketProvider } from "../socket";
 import { redis } from "../config/redis";
-
+import { AudioCall } from "./audioCall";
 export class GroupsManager {
+  private Audio: AudioCall;
   constructor(public socket: Socket) {
+    this.Audio = new AudioCall(this.socket);
     this.init();
   }
   init() {
@@ -14,18 +15,6 @@ export class GroupsManager {
     this.validateGroup();
     this.onDisconnect();
   }
-  private handleError(errorMessage: string) {
-    this.socket.emit("error", errorMessage);
-  }
-  private isUserOffline() {
-    this.socket.on("IsUserOffline", (userId) => {
-      if (SocketProvider.users.has(userId)) {
-        this.socket.emit("IsUserOffline", false);
-      } else {
-        this.socket.emit("IsUserOffline", true);
-      }
-    });
-  }
   private validateGroup() {
     this.socket.on("IsGroupValid", async (groupId) => {
       const isGroupValid = await redis.exists(`group:${groupId}`);
@@ -33,41 +22,51 @@ export class GroupsManager {
     });
   }
   createGroup() {
-    this.socket.on("createGroup", async (groupId: string, callback) => {
+    this.socket.on("createGroup", async (groupId: string, user, callback) => {
       try {
         this.socket.join(groupId);
         const groupsExists = await redis.exists(`group:${groupId}`);
         if (!groupsExists) {
           const created = await redis.hmset(`group:${groupId}`, {
-            members: JSON.stringify([this.socket.id]),
+            members: JSON.stringify([]),
             messages: JSON.stringify([]),
             source_code: "//Start type your code..",
             created_at: new Date().toISOString(),
-            membersInfo: [],
+            membersInfo: JSON.stringify([user]),
           });
+          const AudioToken = this.Audio.generateAudioToken(user.uid, groupId);
           if (created === "OK") {
-            callback({ success: true });
+            callback({
+              success: true,
+              AudioToken,
+            });
           }
-          console.log("Current groups:", created);
         }
       } catch (error) {
-        callback({ success: false, error: "Failed to create group" });
+        callback({
+          success: false,
+          error: "Failed to create group",
+          AudioToken: "",
+        });
       }
     });
   }
   joinGroup() {
-    this.socket.on("joinGroup", async (groupId: string, callback) => {
+    this.socket.on("joinGroup", async (groupId: string, user, callback) => {
       const groupExists = await redis.exists(`group:${groupId}`);
       if (!groupExists) {
         return callback({
           success: false,
           error: `Group ${groupId} does not exist`,
+          AudioToken: "",
         });
       }
       await redis.sadd(`group:${groupId}:members`, this.socket.id);
       this.socket.join(groupId);
-      console.log(`User ${this.socket.id} joined group ${groupId}`);
-      callback({ success: true, id: this.socket.id });
+      callback({
+        success: true,
+        AudioToken: this.Audio.generateAudioToken(user.uid, groupId),
+      });
     });
   }
   leaveGroup() {
@@ -77,7 +76,6 @@ export class GroupsManager {
         await this.socket.leave(groupId);
         await redis.srem(`group:${groupId}:members`, this.socket.id);
         callback({ success: true });
-        console.log(`User ${this.socket.id} left group ${groupId}`);
       } else {
         callback({ success: false, error: `Group ${groupId} does not exist` });
       }
@@ -103,14 +101,10 @@ export class GroupsManager {
           const isMember = await redis.sismember(groupId, this.socket.id);
           if (isMember) {
             await redis.srem(groupId, this.socket.id);
-            console.log(`User ${this.socket.id} removed from ${groupId}`);
           }
         }
       } catch (error) {
-        console.error(
-          `Error while removing user ${this.socket.id} on disconnect:`,
-          error
-        );
+        throw new Error(JSON.stringify(error));
       }
     });
   }
