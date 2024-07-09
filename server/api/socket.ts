@@ -11,7 +11,7 @@ export class SocketProvider {
   constructor() {
     this._io = new Server({
       cors: {
-        origin: "*",
+        origin: "https://codexf.vercel.app/",
         methods: ["GET", "POST"],
         allowedHeaders: ["*"],
         credentials: true,
