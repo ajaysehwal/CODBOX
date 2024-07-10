@@ -13,7 +13,7 @@ CodeXF is a dynamic platform designed to enhance your coding experience with rea
 ## Features
 - **Real-time Code Collaboration**: Work on the same codebase with your team in real-time, ensuring everyone stays in sync.
 - **Integrated Chat and Voice Communication**: Discuss ideas, troubleshoot issues, and provide feedback without leaving the platform.
-![CodeXF](assets/readme/synccode_compiler.png)
+![CodeXF](assets/readme/codexf.png)
 
 - **Fast Code Compiler**: Write, test, and debug your code swiftly with our fast compiler, providing immediate feedback for continuous improvement.
 
