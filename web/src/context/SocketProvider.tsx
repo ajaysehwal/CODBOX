@@ -24,9 +24,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     if (user) {
       socket.current = io(SERVER_PORT, {
         query: { userId: user?.uid },
-        path: '/socket.io',
-        transports: ['websocket'],
-        secure: true,
         withCredentials: true,
         extraHeaders: {
           "Content-Type": "application/json",
