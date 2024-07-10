@@ -23,6 +23,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   useEffect(() => {
     if (user) {
       socket.current = io(SERVER_PORT, {
+        transports: ["websocket", "polling"],
         query: { userId: user?.uid },
         withCredentials: true,
         extraHeaders: {
