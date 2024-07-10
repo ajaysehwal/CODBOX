@@ -2,15 +2,23 @@ import express from "express";
 import http from "http";
 import "dotenv/config";
 import { SocketProvider } from "./socket";
-const PORT = process.env.PORT;
+import cors from "cors";
+const PORT = process.env.PORT || 8000;
 async function WebServer() {
   const app = express();
   const socketprovider = new SocketProvider();
   app.use(express.json());
+  app.use(
+    cors({
+      origin: "https://codexf.vercel.app",
+      methods: ["GET", "POST"],
+      credentials: true,
+    })
+  );
+  app.get('/',(req,res)=>{
+     res.status(200).json({status:"codexf server is running."});
+  })
   const server = http.createServer(app);
-  app.get("/", (req, res) => {
-    res.status(200).json("syncCode server is running...");
-  });
   socketprovider.io.attach(server);
   socketprovider.init();
   server.listen(PORT, () => {

@@ -10,10 +10,11 @@ export class SocketProvider {
   static users: any;
   constructor() {
     this._io = new Server({
+      transports: ["websocket", "polling"],
       cors: {
-        origin: "https://codexf.vercel.app/",
+        origin: "https://codexf.vercel.app",
         methods: ["GET", "POST"],
-        allowedHeaders: ["*"],
+        allowedHeaders: ["Content-Type", "Authorization"],
         credentials: true,
       },
     });
@@ -24,8 +25,10 @@ export class SocketProvider {
     this.io.on("connection", (socket: Socket) => {
       this.users.set(socket.id, socket.handshake.query.userId as string);
       this.initManagers(socket);
+      console.log(this.users);
       socket.on("disconnect", () => {
         this.users.delete(socket.id);
+        console.log(this.users);
       });
     });
     return this._io;
