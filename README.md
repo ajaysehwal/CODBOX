@@ -22,7 +22,6 @@ CodeXF is a dynamic platform designed to enhance your coding experience with rea
 CodeXF was created to address the common challenges when  we faced during traditional coding collaboration. Our aim is to:
 
 - ** Reduce Screen Sharing ** : Unlike traditional methods that rely heavily on screen sharing, CodeXF enables direct interaction with the codebase, making collaboration more efficient and less cumbersome
-- ** Real-time Updates ** : Traditional software often lacks real-time updates, leading to version conflicts and delays. CodeXF ensures all changes are reflected instantly, keeping everyone on the same page
 - ** Educational Tool ** : CodeXF is also an excellent tool for teaching code, allowing students to access and run code in real-time. This hands-on approach enhances learning and provides immediate feedback, making it ideal for educational settings.
 
 ## Getting Started
