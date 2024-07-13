@@ -5,8 +5,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "sync:install": "concurrently \"cd web && yarn\" \"cd server && yarn\"",
-    "sync:dev": "concurrently \"yarn run-web\" \"yarn run-server\"",
+    "xf:install": "concurrently \"cd web && yarn\" \"cd server && yarn\"",
+    "xf:dev": "concurrently \"yarn run-web\" \"yarn run-server\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "run-web": "cd web && yarn dev",
     "run-server": "cd server && yarn dev"

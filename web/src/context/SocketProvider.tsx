@@ -19,11 +19,16 @@ interface SocketProviderProps {
 }
 export const SocketProvider = ({ children }: SocketProviderProps) => {
   const socket = useRef<Socket | null>(null);
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   useEffect(() => {
-    if (!loading || user) {
+    if (user) {
       socket.current = io(SERVER_PORT, {
+        transports: ["websocket", "polling"],
         query: { userId: user?.uid },
+        withCredentials: true,
+        extraHeaders: {
+          "Content-Type": "application/json",
+        },
       });
       socket.current?.on("connect", () => {
         console.log("connected to server");

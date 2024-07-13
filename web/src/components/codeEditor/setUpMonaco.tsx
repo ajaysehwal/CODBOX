@@ -1,6 +1,7 @@
-import * as monaco from "monaco-editor";
+"use client";
+const SetupMonaco = async() => {
+  const monaco = await import("monaco-editor");
 
-export const setupMonaco = () => {
   monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
     target: monaco.languages.typescript.ScriptTarget.ES2015,
     allowNonTsExtensions: true,
@@ -14,12 +15,18 @@ export const setupMonaco = () => {
     typeRoots: ["node_modules/@types"],
   });
 
-  fetch("https://unpkg.com/@types/react@latest/index.d.ts")
-    .then((response) => response.text())
-    .then((types) => {
-      monaco.languages.typescript.typescriptDefaults.addExtraLib(
-        types,
-        "file:///node_modules/@types/react/index.d.ts"
-      );
-    });
+  try {
+    const response = await fetch(
+      "https://unpkg.com/@types/react@latest/index.d.ts"
+    );
+    const types = await response.text();
+    monaco.languages.typescript.typescriptDefaults.addExtraLib(
+      types,
+      "file:///node_modules/@types/react/index.d.ts"
+    );
+  } catch (error) {
+    console.error("Failed to fetch React types:", error);
+  }
 };
+
+export default SetupMonaco;

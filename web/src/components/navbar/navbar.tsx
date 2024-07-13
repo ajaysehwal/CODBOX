@@ -12,9 +12,7 @@ import GoogleSignIn from "./signIn";
 import {
   Menubar,
   MenubarContent,
-  MenubarItem,
   MenubarMenu,
-  MenubarSeparator,
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import { MessageCircleMore } from "lucide-react";
@@ -56,7 +54,7 @@ export default function Navbar() {
         }
       }
     },
-    [groupId, zegoEngine, groupId]
+    [groupId, zegoEngine, groupId,socket]
   );
   return (
     <header className="flex flex-wrap md:justify-start md:flex-nowrap z-50 w-full h-[10vh]">
@@ -66,7 +64,7 @@ export default function Navbar() {
       >
         <div className="md:col-span-3">
           <h1 className="scroll-m-20 text-2xl font-extrabold tracking-tight lg:text-3xl">
-            SyncCode
+            CodeXF
           </h1>
         </div>
         <div className="flex items-center gap-x-2 py-1 ms-auto md:ps-6 md:order-3 md:col-span-3">

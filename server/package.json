@@ -1,5 +1,5 @@
 {
-  "name": "collective-code-server",
+  "name": "synccode",
   "version": "1.0.0",
   "main": "index.js",
   "author": "Ajay Sehwal",
@@ -16,6 +16,7 @@
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/simple-peer": "^9.11.8",
+    "@types/ws": "^8.5.10",
     "nodemon": "^3.1.4",
     "tsc-node": "^0.0.3",
     "tsc-watch": "^6.2.0",
@@ -35,6 +36,7 @@
     "mongoose": "^8.4.4",
     "simple-peer": "^9.11.1",
     "socket.io": "^4.7.5",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "ws": "^8.18.0"
   }
 }

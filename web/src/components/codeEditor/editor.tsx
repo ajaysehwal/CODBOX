@@ -1,14 +1,19 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import Editor from "@monaco-editor/react";
 import { SubmissionResult, Response } from "../interface";
 import * as monaco from "monaco-editor";
+import dynamic from "next/dynamic";
+const Editor = dynamic(
+  () => import("@monaco-editor/react").then((mod) => mod.default),
+  { ssr: false }
+);
 import { useAuth, useSocket } from "@/context";
 import { useToast } from "../ui/use-toast";
 import { ToastAction } from "../ui/toast";
 import { CodeOutput } from "./output";
 import { EditorHeader } from "./header";
-import { setupMonaco } from "./setUpMonaco";
+import SetupMonaco from "./setUpMonaco";
+
 import { Language, Theme, CodeChange } from "../interface";
 import {
   ResizableHandle,
@@ -35,7 +40,7 @@ export default function CodeEditor() {
     editor: monaco.editor.IStandaloneCodeEditor
   ) => {
     editorRef.current = editor;
-    setupMonaco();
+    SetupMonaco();
   };
   const errorToast = (error: string | undefined) => {
     return toast({
@@ -124,7 +129,7 @@ export default function CodeEditor() {
             theme={theme}
             value={code}
             defaultValue="/**
-                        * SyncCode - A platform for seamless collaboration in coding.
+                        * CodeXF - A platform for seamless collaboration in coding.
                         * Connect, code, and create together in real-time!
                                     */"
             onChange={handleEditorChange}

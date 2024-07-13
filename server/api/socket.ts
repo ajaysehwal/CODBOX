@@ -10,10 +10,11 @@ export class SocketProvider {
   static users: any;
   constructor() {
     this._io = new Server({
+      transports: ["websocket", "polling"],
       cors: {
-        origin: "*",
+        origin: "https://codexf.vercel.app",
         methods: ["GET", "POST"],
-        allowedHeaders: ["*"],
+        allowedHeaders: ["Content-Type", "Authorization"],
         credentials: true,
       },
     });

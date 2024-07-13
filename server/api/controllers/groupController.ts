@@ -4,7 +4,7 @@ import { AudioCall } from "./audioCall";
 export class GroupsManager {
   private Audio: AudioCall;
   constructor(public socket: Socket) {
-    this.Audio = new AudioCall(this.socket);
+    this.Audio = new AudioCall();
     this.init();
   }
   init() {

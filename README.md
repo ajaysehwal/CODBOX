@@ -1,31 +1,28 @@
-![SyncCode](https://socialify.git.ci/ajaysehwal/SyncCode/image?description=1&descriptionEditable=SyncCode%3A%20Real-time%20code%20collaboration%20platform.%20Connect%2C%20code%2C%20and%20create%20together%20effortlessly%20with%20integrated%20chat%20and%20voice%20communication%2C%20ensuring%20seamless%20teamwork%20and%20supporting%20beginner%20coders&issues=1&language=1&logo=https%3A%2F%2Fsvgl.app%2Flibrary%2Fnextjs_icon_dark.svg&name=1&pattern=Brick%20Wall&stargazers=1&theme=Light)
+![CodeXF](https://socialify.git.ci/ajaysehwal/CodeXF/image?description=1&descriptionEditable=CodeXF%3A%20Real-time%20code%20collaboration%20platform.%20Connect%2C%20code%2C%20and%20create%20together%20effortlessly%20with%20integrated%20chat%20and%20voice%20communication%2C%20ensuring%20seamless%20teamwork%20and%20supporting%20beginner%20coders&issues=1&language=1&logo=https%3A%2F%2Fsvgl.app%2Flibrary%2Fnextjs_icon_dark.svg&name=1&pattern=Brick%20Wall&stargazers=1&theme=Light)
 
 <p align="center">
-<img src="https://img.shields.io/github/license/ajaysehwal/SyncCode" />
+<img src="https://img.shields.io/github/license/ajaysehwal/CodeXF" />
 <img src="https://img.shields.io/badge/Author-ajaysehwal-orange" />
 </p>
 
 ## 💥 Introduction
 
-SyncCode is a dynamic platform designed to enhance your coding experience with real-time collaboration, integrated communication tools, and a fast code compiler.
+CodeXF is a dynamic platform designed to enhance your coding experience with real-time collaboration, integrated communication tools, and a fast code compiler.
 
 
 ## Features
 - **Real-time Code Collaboration**: Work on the same codebase with your team in real-time, ensuring everyone stays in sync.
-![synccode](assets/readme/synccode_groups.png)
-
 - **Integrated Chat and Voice Communication**: Discuss ideas, troubleshoot issues, and provide feedback without leaving the platform.
-![synccode](assets/readme/synccode_compiler.png)
+![CodeXF](assets/readme/codexf.png)
 
 - **Fast Code Compiler**: Write, test, and debug your code swiftly with our fast compiler, providing immediate feedback for continuous improvement.
 
-## Motive Behind SyncCode
+## Motive Behind CodeXF
 
-SyncCode was created to address the common challenges when  we faced during traditional coding collaboration. Our aim is to:
+CodeXF was created to address the common challenges when  we faced during traditional coding collaboration. Our aim is to:
 
-- ** Reduce Screen Sharing ** : Unlike traditional methods that rely heavily on screen sharing, SyncCode enables direct interaction with the codebase, making collaboration more efficient and less cumbersome
-- ** Real-time Updates ** : Traditional software often lacks real-time updates, leading to version conflicts and delays. SyncCode ensures all changes are reflected instantly, keeping everyone on the same page
-- ** Educational Tool ** : SyncCode is also an excellent tool for teaching code, allowing students to access and run code in real-time. This hands-on approach enhances learning and provides immediate feedback, making it ideal for educational settings.
+- ** Reduce Screen Sharing ** : Unlike traditional methods that rely heavily on screen sharing, CodeXF enables direct interaction with the codebase, making collaboration more efficient and less cumbersome
+- ** Educational Tool ** : CodeXF is also an excellent tool for teaching code, allowing students to access and run code in real-time. This hands-on approach enhances learning and provides immediate feedback, making it ideal for educational settings.
 
 ## Getting Started
 
@@ -34,7 +31,7 @@ SyncCode was created to address the common challenges when  we faced during trad
 3. **Collaborate**: Use our real-time editor and integrated communication tools to work with your team.
 4. **Compile and Test**: Utilize our fast compiler to write, test, and debug your code.
 
-## Tech Stack used in SyncCode
+## Tech Stack used in CodeXF
 - [Nextjs](https://nextjs.org/)
 - [Expressjs](https://expressjs.com/) , [Socket.io](https://socket.io/)
 - Aiven  - [cloud redis service ](https://aiven.io/)
@@ -44,16 +41,16 @@ SyncCode was created to address the common challenges when  we faced during trad
 ## 🛠️ Local development
 ### Clone the Repository
 
-To get started with SyncCode, clone the repository to your local machine:
+To get started with CodeXF, clone the repository to your local machine:
 
 ```sh
-git clone https://github.com/ajaysehwal/SyncCode.git
-cd SyncCode
+git clone https://github.com/ajaysehwal/CodeXF.git
+cd CodeXF
 ```
-### Run SyncCode Locally
+### Run CodeXF Locally
 ```sh
- yarn sync:install or npm run sync:install
- yarn sync:dev or npm run sync:dev
+ yarn xf:install or npm run xf:install
+ yarn xf:dev or npm run xf:dev
 ```
 Now we will add the environment variables in the web/ and server/
 
