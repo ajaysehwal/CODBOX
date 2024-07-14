@@ -1,155 +1,148 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import { SubmissionResult, Response } from "../interface";
-import * as monaco from "monaco-editor";
+
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
-const Editor = dynamic(
-  () => import("@monaco-editor/react").then((mod) => mod.default),
-  { ssr: false }
-);
+import { useSearchParams } from "next/navigation";
+import * as monaco from "monaco-editor";
+
 import { useAuth, useSocket } from "@/context";
 import { useToast } from "../ui/use-toast";
 import { ToastAction } from "../ui/toast";
 import { CodeOutput } from "./output";
 import { EditorHeader } from "./header";
 import SetupMonaco from "./setUpMonaco";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "../ui/resizable";
+import { SubmissionResult, Response, Language, Theme, CodeChange } from "../interface";
 
-import { Language, Theme, CodeChange } from "../interface";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "../ui/resizable";
-import { useSearchParams } from "next/navigation";
+const Editor = dynamic(() => import("@monaco-editor/react").then((mod) => mod.default), { ssr: false });
+
+const DEFAULT_LANGUAGE: Language = "javascript";
+const DEFAULT_THEME: Theme = "light";
+const DEFAULT_CODE = `/**
+ * CodeXF - A platform for seamless collaboration in coding.
+ * Connect, code, and create together in real-time!
+ */`;
 
 export default function CodeEditor() {
   const searchParams = useSearchParams();
-  const [language, setLanguage] = useState<Language>("javascript");
-  const [theme, setTheme] = useState<Theme>("light");
-  const groupId = searchParams.get("id") as string;
   const socket = useSocket();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [code, setCode] = useState<string>("");
-  const [open, setOpen] = useState<boolean>(false);
-  const [compileResponse, setCompileResponse] =
-    useState<SubmissionResult | null>(null);
-  const [compileLoad, setCompileLoad] = useState<boolean>(true);
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const handleEditorDidMount = (
-    editor: monaco.editor.IStandaloneCodeEditor
-  ) => {
+
+  const [language, setLanguage] = useState<Language>(DEFAULT_LANGUAGE);
+  const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
+  const [code, setCode] = useState<string>(DEFAULT_CODE);
+  const [isOutputOpen, setIsOutputOpen] = useState<boolean>(false);
+  const [compileResponse, setCompileResponse] = useState<SubmissionResult | null>(null);
+  const [isCompiling, setIsCompiling] = useState<boolean>(false);
+
+  const groupId = searchParams.get("id") as string;
+
+  const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     editorRef.current = editor;
     SetupMonaco();
   };
-  const errorToast = (error: string | undefined) => {
-    return toast({
+
+  const showErrorToast = useCallback((error: string) => {
+    toast({
       variant: "destructive",
       title: error,
       description: "There was a problem with your request.",
       action: <ToastAction altText="Try again">Try again</ToastAction>,
     });
-  };
-  const handleEditorChange = (value: string | undefined) => {
-    if (value !== undefined) {
-      setCode(value);
-      if (groupId && editorRef.current) {
-        const model = editorRef.current.getModel();
-        if (model) {
-          const change = {
-            delta: value,
-            range: model.getFullModelRange(),
-          };
-          socket?.emit("codeChange", groupId, change);
-        }
-      }
-    }
-  };
-  const handleThemeChange = (value: Theme) => {
-    setTheme(value);
-  };
-  const handleLanguageChange = (value: Language) => {
-    setLanguage(value);
-  };
-  const evalCode = () => {
-    setCompileLoad(false);
-    setOpen(true);
+  }, [toast]);
+
+  const handleEditorChange = useCallback((value: string | undefined) => {
+    if (value === undefined) return;
+
+    setCode(value);
+    if (!groupId || !editorRef.current) return;
+
+    const model = editorRef.current.getModel();
+    if (!model) return;
+
+    const change = {
+      delta: value,
+      range: model.getFullModelRange(),
+    };
+    socket?.emit("codeChange", groupId, change);
+  }, [groupId, socket]);
+
+  const evalCode = useCallback(() => {
+    setIsCompiling(true);
+    setIsOutputOpen(true);
+
     const evalRequest = {
       source_code: code,
-      language: language,
+      language,
       user_id: user?.uid,
     };
+
     socket?.emit("evalcode", evalRequest, (response: Response) => {
       if (!response.success) {
-        errorToast(response.error);
-      }
-      if (response.result) {
+        showErrorToast(response.error || "Unknown error occurred");
+        setIsOutputOpen(false);
+      } else if (response.result) {
         setCompileResponse(response.result);
-        setCompileLoad(true);
       } else {
-        setOpen(false);
-        errorToast("Internal Server error");
+        setIsOutputOpen(false);
+        showErrorToast("Internal Server error");
+      }
+      setIsCompiling(false);
+    });
+  }, [code, language, user, socket, showErrorToast]);
+
+  useEffect(() => {
+    if (!groupId || !socket) return;
+
+    const handleCodeUpdate = (response: { updatedCode: string; change: CodeChange }) => {
+      setCode(response.updatedCode);
+    };
+
+    socket.emit("codeTemplate", groupId, (initialCode: string) => {
+      setCode(initialCode);
+      if (editorRef.current) {
+        editorRef.current.setValue(initialCode);
       }
     });
-  };
-  useEffect(() => {
-    if (groupId && socket) {
-      socket?.emit("codeTemplate", groupId, (initialCode: string) => {
-        setCode(initialCode);
-        if (editorRef.current) {
-          editorRef.current.setValue(initialCode);
-        }
-      });
-      socket?.on(
-        "codeUpdate",
-        (response: { updatedCode: string; change: CodeChange }) => {
-          setCode(response.updatedCode);
-        }
-      );
-    }
+
+    socket.on("codeUpdate", handleCodeUpdate);
+
     return () => {
-      socket?.off("codeUpdate");
+      socket.off("codeUpdate", handleCodeUpdate);
     };
   }, [socket, groupId]);
 
   return (
-    <>
-      <ResizablePanelGroup direction="vertical" className="w-full ">
-        <ResizablePanel defaultSize={75}>
-          <EditorHeader
-            theme={theme}
-            language={language}
-            onThemeChange={handleThemeChange}
-            onLanguageChange={handleLanguageChange}
-            onEvalCode={evalCode}
-          />
-          <Editor
-            height="85vh"
-            language={language}
-            theme={theme}
-            value={code}
-            defaultValue="/**
-                        * CodeXF - A platform for seamless collaboration in coding.
-                        * Connect, code, and create together in real-time!
-                                    */"
-            onChange={handleEditorChange}
-            onMount={handleEditorDidMount}
+    <ResizablePanelGroup direction="vertical" className="w-full">
+      <ResizablePanel defaultSize={75}>
+        <EditorHeader
+          theme={theme}
+          language={language}
+          onThemeChange={setTheme}
+          onLanguageChange={setLanguage}
+          onEvalCode={evalCode}
+        />
+        <Editor
+          height="85vh"
+          language={language}
+          theme={theme}
+          value={code}
+          defaultValue={DEFAULT_CODE}
+          onChange={handleEditorChange}
+          onMount={handleEditorDidMount}
+        />
+      </ResizablePanel>
+      <ResizableHandle />
+      {isOutputOpen && (
+        <ResizablePanel defaultSize={25} className="border-gray-300">
+          <CodeOutput
+            Loading={isCompiling}
+            result={compileResponse}
           />
         </ResizablePanel>
-        <ResizableHandle />
-        {open && (
-          <ResizablePanel defaultSize={25} className="border-gray-300">
-            {open && (
-              <CodeOutput
-                setOpen={setOpen}
-                Loading={compileLoad}
-                result={compileResponse}
-                setCompileResponse={setCompileResponse}
-              />
-            )}
-          </ResizablePanel>
-        )}
-      </ResizablePanelGroup>
-    </>
+      )}
+    </ResizablePanelGroup>
   );
 }

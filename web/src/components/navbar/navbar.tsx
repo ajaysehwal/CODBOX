@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useCallback } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useInviteTokenStore } from "@/zustand";
+import { useGroupsStore, useInviteTokenStore } from "@/zustand";
 import { Account, JoinGroup, CreateGroup, LeaveGroup, Invite } from ".";
 import { useAuth, useSocket, useZegoEngine } from "@/context";
 import ZegoLocalStream from "zego-express-engine-webrtc/sdk/code/zh/ZegoLocalStream.web";
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/menubar";
 import { MessageCircleMore } from "lucide-react";
 import ChatSection from "../chat/chat";
+import { Button } from "../ui/button";
 export default function Navbar() {
   const path = usePathname().trim();
   const socket = useSocket();
@@ -25,37 +26,46 @@ export default function Navbar() {
   const { token } = useInviteTokenStore();
   const { user } = useAuth();
   const { zegoEngine } = useZegoEngine();
-
   const [localStream, SetLocalStream] = useState<ZegoLocalStream | null>(null);
   const { toast } = useToast();
-  const Join = useCallback(
-    async (groupId: string, user: User | null, token: string) => {
-      if (zegoEngine && groupId && user) {
-        try {
-          await zegoEngine.loginRoom(groupId, token, {
-            userID: user?.uid as string,
-            userName: user?.email as string,
-          });
-          const localStream = await zegoEngine.createZegoStream({
-            camera: { audio: true, video: false },
-            audioBitrate: 192,
-          });
-          SetLocalStream(localStream);
-          zegoEngine.startPublishingStream(`${user?.uid}_stream`, localStream);
 
-          socket?.emit("joinGroup", groupId, user);
-        } catch (err) {
+  const Join = useCallback(
+    async (groupId: string, user: User, audioToken: string) => {
+      if (groupId && user) {
+        try {
+          console.log("joined");
+          // SetUpVoiceConnection(groupId, audioToken, user);
+        } catch (error) {
           toast({
             variant: "destructive",
-            title: JSON.stringify(err),
-            description: "Please return home page manually",
+            title: JSON.stringify(error),
+            description: "Unable to Join Group",
             action: <ToastAction altText="Try again">Try again</ToastAction>,
           });
         }
       }
     },
-    [groupId, zegoEngine, groupId,socket]
+    [socket, zegoEngine, groupId]
   );
+  const SetUpVoiceConnection = async (
+    groupId: string,
+    token: string,
+    user: User
+  ) => {
+    if (zegoEngine) {
+      await zegoEngine.loginRoom(groupId, token, {
+        userID: user?.uid as string,
+        userName: user?.email as string,
+      });
+      const localStream = await zegoEngine.createZegoStream({
+        camera: { audio: true, video: false },
+        audioBitrate: 192,
+        autoPlay: true,
+      });
+      SetLocalStream(localStream);
+      zegoEngine.startPublishingStream(`${user?.uid}_stream`, localStream);
+    }
+  };
   return (
     <header className="flex flex-wrap md:justify-start md:flex-nowrap z-50 w-full h-[10vh]">
       <nav
@@ -80,11 +90,17 @@ export default function Navbar() {
                   <div className="block lg:hidden">
                     <Menubar>
                       <MenubarMenu>
-                        <MenubarTrigger className="bg-sky-700 text-white rounded-full hover:bg-sky-500 hover:text-white">
-                          <MessageCircleMore className="w-8 h-8" />
+                        <MenubarTrigger>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="rounded-full"
+                          >
+                            <MessageCircleMore className="w-8 h-8" />
+                          </Button>
                         </MenubarTrigger>
                         <MenubarContent className="w-[350px]">
-                          <ChatSection/>
+                          <ChatSection />
                         </MenubarContent>
                       </MenubarMenu>
                     </Menubar>

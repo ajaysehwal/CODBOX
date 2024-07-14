@@ -1,11 +1,12 @@
 "use client";
-import { useSocket, useZegoEngine } from "@/context";
+import { useAuth, useSocket, useZegoEngine } from "@/context";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "../ui/use-toast";
 import { useState, useCallback } from "react";
 import { ToastAction } from "../ui/toast";
 import { Button } from "../ui/button";
 import ZegoLocalStream from "zego-express-engine-webrtc/sdk/code/zh/ZegoLocalStream.web";
+import { useGroupsStore } from "@/zustand";
 interface Response {
   success: boolean;
   error: string;
@@ -22,13 +23,15 @@ export const LeaveGroup = ({
   const { toast } = useToast();
   const [LeaveLoad, setLeaveLoad] = useState<boolean>(true);
   const { zegoEngine } = useZegoEngine();
-
+  const { removeMember } = useGroupsStore();
+  const { user } = useAuth();
   const LeaveGroup = useCallback(
     (groupId: string) => {
       setLeaveLoad(false);
       const id = setTimeout(() => {
-        socket?.emit("leaveGroup", groupId, (response: Response) => {
+        socket?.emit("leaveGroup", groupId, user, (response: Response) => {
           if (response.success) {
+            removeMember(user?.uid as string);
             VoiceDISCONNECTION(groupId);
             router.push("/");
           } else {
