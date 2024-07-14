@@ -25,10 +25,8 @@ export class SocketProvider {
     this.io.on("connection", (socket: Socket) => {
       this.users.set(socket.id, socket.handshake.query.userId as string);
       this.initManagers(socket);
-      console.log(this.users);
       socket.on("disconnect", () => {
         this.users.delete(socket.id);
-        console.log(this.users);
       });
     });
     return this._io;

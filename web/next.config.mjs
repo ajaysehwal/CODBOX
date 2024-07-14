@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+<<<<<<< HEAD
   env: {
     NEXT_PUBLIC_FIREBASE_API_KEY: "AIzaSyAgi3Toh4i8WYqOJKHRUXybPGPu5nYiMpg",
     NEXT_PUBLIC_FIREBASE_AUTHDOMAIN: "codexf-49485.firebaseapp.com",
@@ -14,6 +15,8 @@ const nextConfig = {
     NEXT_PUBLIC_ZEGOCLOUD_APP_ID: "1843547935",
     NEXT_PUBLIC_ZEGOCLOUD_SERVER: "413a29ab68595d97b9f30beee5bee3fb",
   },
+=======
+>>>>>>> d70fbd876bf8dc7b2ab26788918a8f1f06b182da
   reactStrictMode: true,
   images: {
     domains: ["lh3.googleusercontent.com", "images.unsplash.com"],
