@@ -6,6 +6,7 @@ import { useCallback, useState } from "react";
 import { ToastAction } from "../ui/toast";
 import { Button } from "../ui/button";
 import { User } from "firebase/auth";
+import { useGroupsStore } from "@/zustand";
 
 interface Response {
   success: boolean;
@@ -17,13 +18,14 @@ export const CreateGroup = ({
   Join,
 }: {
   groupId: string;
-  Join: (groupId: string, user: User | null, token: string) => Promise<void>;
+  Join: (groupId: string, user: User, audioToken: string) => Promise<void>;
 }) => {
   const router = useRouter();
   const socket = useSocket();
   const { toast } = useToast();
   const { user } = useAuth();
   const [createLoad, setCreateLoad] = useState<boolean>(true);
+  const { setGroupId } = useGroupsStore();
   const createGroup = useCallback(
     (groupId: string) => {
       setCreateLoad(false);
@@ -34,8 +36,9 @@ export const CreateGroup = ({
           user,
           async (response: Response) => {
             if (response.success) {
-             await Join(groupId, user, response.AudioToken);
-              router.push(`/group?id=${groupId}`)
+              setGroupId(groupId);
+              await Join(groupId, user as User, response.AudioToken);
+              router.push(`/group?id=${groupId}`);
             } else {
               toast({
                 variant: "destructive",

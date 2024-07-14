@@ -5,6 +5,7 @@ import { redirect, useSearchParams, useRouter } from "next/navigation";
 import { useAuth, useSocket, useZegoEngine } from "@/context";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
+import { useGroupsStore } from "@/zustand";
 export default function GroupPage() {
   const searchParams = useSearchParams();
   const socket = useSocket();
@@ -13,6 +14,7 @@ export default function GroupPage() {
   const { zegoEngine } = useZegoEngine();
   const groupId = searchParams.get("id") as string;
   const { user } = useAuth();
+  const { setGroupId } = useGroupsStore();
   const Error = (error: string, desc?: string) => {
     toast({
       variant: "destructive",
@@ -34,20 +36,20 @@ export default function GroupPage() {
         if (!response.success) {
           Error("Please Join Group by entering token in  join other section");
         } else {
-          if (zegoEngine) {
-            await zegoEngine.loginRoom(groupId, response.AudioToken, {
-              userID: user?.uid as string,
-              userName: user?.email as string,
-            });
-            const localStream = await zegoEngine.createZegoStream({
-              camera: { audio: true, video: false },
-              audioBitrate: 192,
-            });
-            zegoEngine.startPublishingStream(
-              `${user?.uid}_stream`,
-              localStream
-            );
-          }
+          // if (zegoEngine) {
+          //   await zegoEngine.loginRoom(groupId, response.AudioToken, {
+          //     userID: user?.uid as string,
+          //     userName: user?.email as string,
+          //   });
+          //   const localStream = await zegoEngine.createZegoStream({
+          //     camera: { audio: true, video: false },
+          //     audioBitrate: 192,
+          //   });
+          //   zegoEngine.startPublishingStream(
+          //     `${user?.uid}_stream`,
+          //     localStream
+          //   );
+          // }
         }
       }
     );
@@ -62,9 +64,13 @@ export default function GroupPage() {
             router.push("/");
           }, 3000);
         } else {
+          setGroupId(groupId);
           Rejoin();
         }
       });
+      if (groupId) {
+        socket.emit("onDisconnect", groupId, user);
+      }
     }
     return () => {
       socket?.off("IsGroupValid");

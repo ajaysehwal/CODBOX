@@ -15,7 +15,7 @@ export default function Home() {
       <div className="grid grid-cols-4 w-full">
         <div
           className={`col-span-4 ${
-            pathname === "/group" ? "lg:col-span-3" : "lg:col-span-4"
+            pathname === "/group" ? "lg:col-span-3 rounded-tr-lg" : "lg:col-span-4"
           } h-[90vh]`}
         >
           <CodeEditor />

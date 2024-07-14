@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
 import { LANGUAGES, THEMES } from "../constants";
 import { Language, Theme } from "../interface";
+import GroupParticipants from "../chat/participants";
+import { useSearchParams } from "next/navigation";
 
 interface EditorHeaderProps {
   theme: Theme;
@@ -26,8 +28,28 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   onThemeChange,
   onLanguageChange,
   onEvalCode,
-}) => (
-  <div className="h-[5vh] bg-[rgb(199,209,248)] w-full flex items-center">
+}) => {
+  const searchParams = useSearchParams();
+  const groupId = searchParams.get("id") as string;
+
+  return (
+    <div className="h-[5vh] bg-[rgb(199,209,248)] w-full flex items-center">
+      <Themes onThemeChange={onThemeChange} theme={theme} />
+      <Languages onLanguageChange={onLanguageChange} language={language} />
+      <RunCode run={onEvalCode} />
+      {groupId && <GroupParticipants />}
+    </div>
+  );
+};
+
+const Themes = ({
+  onThemeChange,
+  theme,
+}: {
+  onThemeChange: (value: Theme) => void;
+  theme: Theme;
+}) => {
+  return (
     <Select onValueChange={onThemeChange} value={theme}>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Theme" />
@@ -40,6 +62,17 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
         ))}
       </SelectContent>
     </Select>
+  );
+};
+
+const Languages = ({
+  onLanguageChange,
+  language,
+}: {
+  onLanguageChange: (value: Language) => void;
+  language: Language;
+}) => {
+  return (
     <Select onValueChange={onLanguageChange} value={language}>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Language" />
@@ -52,14 +85,17 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
         ))}
       </SelectContent>
     </Select>
-    <div>
-      <Button
-        onClick={onEvalCode}
-        className="bg-green-600 text-white flex items-center gap-1 hover:bg-green-500"
-      >
-        <Play className="w-[18px] h-[18px]" />
-        Run
-      </Button>
-    </div>
+  );
+};
+
+const RunCode = ({ run }: { run: () => void }) => (
+  <div>
+    <Button
+      onClick={() => run()}
+      className="bg-green-600 text-white flex items-center gap-1 hover:bg-green-500"
+    >
+      <Play className="w-[18px] h-[18px]" />
+      Run
+    </Button>
   </div>
 );

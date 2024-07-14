@@ -3,21 +3,15 @@ import React from "react";
 import { motion } from "framer-motion";
 import { SubmissionResult } from "../interface";
 export const CodeOutput = ({
-  setOpen,
   Loading,
   result,
-  setCompileResponse,
 }: {
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   Loading: boolean;
   result: SubmissionResult | null;
-  setCompileResponse: React.Dispatch<
-    React.SetStateAction<SubmissionResult | null>
-  >;
 }) => {
   return (
     <div className="w-full">
-      {!Loading && (
+      {Loading && (
         <motion.div
           className="w-[50%] h-1 top-0 bg-blue-600"
           initial={{ x: "-100%" }}

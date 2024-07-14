@@ -12,15 +12,16 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { User } from "firebase/auth";
+import { useGroupsStore } from "@/zustand";
 interface Response {
   success: boolean;
   error: string;
-  AudioToken: string;
+  token: string;
 }
 export const JoinGroup = ({
   Join,
 }: {
-  Join: (groupId: string, user: User | null, token: string) => Promise<void>;
+  Join: (groupId: string, user: User, audioToken: string) => Promise<void>;
 }) => {
   const router = useRouter();
   const socket = useSocket();
@@ -47,14 +48,15 @@ export const JoinGroup = ({
       const id = setTimeout(() => {
         socket?.emit("joinGroup", groupId, user, async (response: Response) => {
           if (response.success) {
-            await Join(groupId, user, response.AudioToken);
+            await Join(groupId, user as User, response.token);
             router.push(`/group?id=${groupId}`);
           } else {
             Error(response.error);
             setJoinLoad(true);
           }
         });
-      }, 2000);
+      }, 1000);
+
       return () => clearTimeout(id);
     },
     [socket, router]
