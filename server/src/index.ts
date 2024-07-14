@@ -10,14 +10,14 @@ async function WebServer() {
   app.use(express.json());
   app.use(
     cors({
-      origin: "https://codexf.vercel.app",
+      origin: ["https://codexf.vercel.app", process.env.CLIENT_URL1 as string],
       methods: ["GET", "POST"],
       credentials: true,
     })
   );
-  app.get('/',(req,res)=>{
-     res.status(200).json({status:"codexf server is running."});
-  })
+  app.get("/", (req, res) => {
+    res.status(200).json({ status: "codexf server is running." });
+  });
   const server = http.createServer(app);
   socketprovider.io.attach(server);
   socketprovider.init();
