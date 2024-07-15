@@ -36,7 +36,6 @@ export default function CodeEditor() {
   const [isOutputOpen, setIsOutputOpen] = useState<boolean>(false);
   const [compileResponse, setCompileResponse] = useState<SubmissionResult | null>(null);
   const [isCompiling, setIsCompiling] = useState<boolean>(false);
-
   const groupId = searchParams.get("id") as string;
 
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {

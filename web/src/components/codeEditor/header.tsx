@@ -13,6 +13,8 @@ import { LANGUAGES, THEMES } from "../constants";
 import { Language, Theme } from "../interface";
 import GroupParticipants from "../chat/participants";
 import { useSearchParams } from "next/navigation";
+import { Input } from "../ui/input";
+import { SelectSeparator } from "@radix-ui/react-select";
 
 interface EditorHeaderProps {
   theme: Theme;
@@ -33,7 +35,8 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   const groupId = searchParams.get("id") as string;
 
   return (
-    <div className="h-[5vh] bg-[rgb(199,209,248)] w-full flex items-center">
+    <div className="h-[5vh] bg-[rgb(248,116,114)] w-full flex items-center">
+      <Files />
       <Themes onThemeChange={onThemeChange} theme={theme} />
       <Languages onLanguageChange={onLanguageChange} language={language} />
       <RunCode run={onEvalCode} />
@@ -99,3 +102,21 @@ const RunCode = ({ run }: { run: () => void }) => (
     </Button>
   </div>
 );
+
+const Files = () => {
+  return (
+    <Select>
+      <SelectTrigger className="w-[180px]">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent className="w-[400px]">
+        <div className="flex items-center gap-2 justify-center">
+          <Input placeholder="create new file" />
+          <Button>Create</Button>
+        </div>
+        <SelectItem value="index.js">index.js</SelectItem>
+        <SelectItem value="work.js">work.js</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+};

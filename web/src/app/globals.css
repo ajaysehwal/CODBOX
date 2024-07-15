@@ -129,3 +129,29 @@
 #checkbox:active + .switch {
   scale: 1.2;
 }
+
+
+
+
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Custom scrollbar styles */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thumb-blue-500::-webkit-scrollbar-thumb {
+  background-color: rgb(254,235,137);
+  border-radius: 3px;
+}
+
+.scrollbar-track-blue-100::-webkit-scrollbar-track {
+  background-color: #dbeafe;
+}
+
+.hover\:scrollbar-thumb-blue-700:hover::-webkit-scrollbar-thumb {
+  background-color: rgb(244, 223, 119);
+}
