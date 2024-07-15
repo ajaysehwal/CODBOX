@@ -18,11 +18,13 @@
     "@types/simple-peer": "^9.11.8",
     "@types/ws": "^8.5.10",
     "nodemon": "^3.1.4",
+    "prisma": "^5.16.2",
     "tsc-node": "^0.0.3",
     "tsc-watch": "^6.2.0",
     "typescript": "^5.5.3"
   },
   "dependencies": {
+    "@prisma/client": "^5.16.2",
     "@types/uuid": "^10.0.0",
     "bcryptjs": "^2.4.3",
     "child_process": "^1.0.2",

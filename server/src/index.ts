@@ -4,7 +4,7 @@ import "dotenv/config";
 import { SocketProvider } from "./socket";
 import cors from "cors";
 const PORT = process.env.PORT || 8000;
-async function WebServer() {
+async function main() {
   const app = express();
   const socketprovider = new SocketProvider();
   app.use(express.json());
@@ -35,7 +35,7 @@ async function WebServer() {
   });
 }
 
-WebServer().catch((error) => {
+main().catch((error) => {
   console.error("Failed to start server:", error);
   process.exit(1);
 });
