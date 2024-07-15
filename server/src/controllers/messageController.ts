@@ -6,6 +6,7 @@ export type Message = {
   text: string;
   uuid: string;
   timestamp: Date;
+  avatar:string;
   email: string;
 };
 export class MessagesMananger {

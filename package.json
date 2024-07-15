@@ -5,11 +5,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "xf:install": "concurrently \"cd web && yarn\" \"cd server && yarn\"",
-    "xf:dev": "concurrently \"yarn run-web\" \"yarn run-server\"",
+    "xf:install": "concurrently \"cd web && pnpm install\" \"cd server && pnpm install\"",
+    "xf:dev": "concurrently \"pnpm run-web\" \"pnpm run-server\"",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "run-web": "cd web && yarn dev",
-    "run-server": "cd server && yarn dev"
+    "run-web": "cd web && pnpm dev",
+    "run-server": "cd server && pnpm dev"
   },
   "author": "Ajay Sehwal",
   "license": "ISC",
