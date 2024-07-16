@@ -49,8 +49,8 @@ cd CodeXF
 ```
 ### Run CodeXF Locally
 ```sh
- yarn xf:install or npm run xf:install
- yarn xf:dev or npm run xf:dev
+ pnpm xf:install or npm run xf:install
+ pnpm xf:dev or npm run xf:dev
 ```
 Now we will add the environment variables in the web/ and server/
 
