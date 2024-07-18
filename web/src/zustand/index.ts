@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import { generateRandomToken } from "@/utils";
 import { User } from "firebase/auth";
-
+export interface GroupUser extends User {
+  type: string;
+}
 interface TokenState {
   token: string;
 }
@@ -9,19 +11,19 @@ export const useInviteTokenStore = create<TokenState>((set) => ({
   token: generateRandomToken(16),
 }));
 interface Members {
-  members: User[];
+  members: GroupUser[];
   groupId: string;
-  setMembers: (members: User[]) => void;
+  setMembers: (members: GroupUser[]) => void;
   setGroupId: (groupId: string) => void;
-  setNewGroupMember: (member: User) => void;
+  setNewGroupMember: (member: GroupUser) => void;
   removeMember: (memberId: string) => void;
 }
 export const useGroupsStore = create<Members>((set) => ({
   members: [],
   groupId: "",
-  setMembers: (members: User[]) => set({ members }),
+  setMembers: (members: GroupUser[]) => set({ members }),
   setGroupId: (groupId: string) => set({ groupId }),
-  setNewGroupMember: (member: User) =>
+  setNewGroupMember: (member: GroupUser) =>
     set((state) => ({
       members: [...state.members, member],
     })),

@@ -1,5 +1,5 @@
 // constants.ts
-export const LANGUAGES = [
+export const DEFAULT_LANGUAGE = [
   "javascript",
   "typescript",
   "python",
@@ -9,4 +9,6 @@ export const LANGUAGES = [
   "rust",
 ] as const;
 
-export const THEMES = ["vs-dark", "light"] as const;
+export const DEFAULT_THEME = ["vs-dark", "light"] as const;
+
+export const DEFAULT_CODE = "" as const;

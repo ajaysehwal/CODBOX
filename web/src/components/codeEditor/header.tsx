@@ -9,12 +9,11 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
-import { LANGUAGES, THEMES } from "../constants";
+import { DEFAULT_LANGUAGE, DEFAULT_THEME } from "../constants";
 import { Language, Theme } from "../interface";
 import GroupParticipants from "../chat/participants";
 import { useSearchParams } from "next/navigation";
 import { Input } from "../ui/input";
-import { SelectSeparator } from "@radix-ui/react-select";
 
 interface EditorHeaderProps {
   theme: Theme;
@@ -35,7 +34,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   const groupId = searchParams.get("id") as string;
 
   return (
-    <div className="h-[5vh] bg-[rgb(248,116,114)] w-full flex items-center">
+    <div className="h-[5vh] bg-[rgb(217,232,254)] w-full flex items-center">
       <Files />
       <Themes onThemeChange={onThemeChange} theme={theme} />
       <Languages onLanguageChange={onLanguageChange} language={language} />
@@ -58,7 +57,7 @@ const Themes = ({
         <SelectValue placeholder="Theme" />
       </SelectTrigger>
       <SelectContent>
-        {THEMES.map((el) => (
+        {DEFAULT_THEME.map((el) => (
           <SelectItem key={el} value={el}>
             {el.charAt(0).toUpperCase() + el.slice(1)}
           </SelectItem>
@@ -81,7 +80,7 @@ const Languages = ({
         <SelectValue placeholder="Language" />
       </SelectTrigger>
       <SelectContent>
-        {LANGUAGES.map((el) => (
+        {DEFAULT_LANGUAGE.map((el) => (
           <SelectItem key={el} value={el}>
             {el.charAt(0).toUpperCase() + el.slice(1)}
           </SelectItem>

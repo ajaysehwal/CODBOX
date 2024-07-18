@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import CodeEditor from "@/components/codeEditor/editor";
 import ChatSection from "@/components/chat/chat";
 import { useEffect } from "react";
+import PreviousNotes from "@/components/history/PreviousNotes";
 export default function Home() {
   const pathname = usePathname();
   useEffect(() => {
@@ -13,20 +14,18 @@ export default function Home() {
   return (
     <main className="relative w-full">
       <div className="grid grid-cols-4 w-full">
-        <div
-          className={`col-span-4 ${
-            pathname === "/group" ? "lg:col-span-3 rounded-tr-lg" : "lg:col-span-4"
-          } h-[90vh]`}
-        >
+        <div className="col-span-3 h-[90vh]">
           <CodeEditor />
         </div>
-        <div
-          className={`hidden lg:block ${
-            pathname !== "/group" && "lg:hidden"
-          }  duration-300 transform`}
-        >
-          <ChatSection />
-        </div>
+        {pathname === "/group" ? (
+          <div className="hidden lg:block duration-300 transform">
+            <ChatSection />
+          </div>
+        ) : (
+          <div className="duration-300 transform">
+            <PreviousNotes />
+          </div>
+        )}
       </div>
     </main>
   );

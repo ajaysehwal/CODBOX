@@ -34,9 +34,9 @@ export interface SubmissionResult {
   memory?: any;
 }
 
-import { LANGUAGES, THEMES } from "../constants";
-export type Language = (typeof LANGUAGES)[number];
-export type Theme = (typeof THEMES)[number];
+import { DEFAULT_LANGUAGE, DEFAULT_THEME } from "../constants";
+export type Language = (typeof DEFAULT_LANGUAGE)[number];
+export type Theme = (typeof DEFAULT_THEME)[number];
 
 export interface CompileResponse {
   error: string;
@@ -46,9 +46,8 @@ export interface CompileResponse {
 export interface Response {
   success: boolean;
   error?: string;
-  result?:SubmissionResult;
+  result?: SubmissionResult;
 }
-
 
 export interface CodeChange {
   delta: string;

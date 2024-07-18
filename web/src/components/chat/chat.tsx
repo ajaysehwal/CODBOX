@@ -75,7 +75,7 @@ export default function ChatSection() {
   }, [messages, scrollToBottom]);
 
   return (
-    <div className="min-h-full bg-gradient-to-r from-red-400 to-yellow-200 relative">
+    <div className="min-h-full bg-gradient-to-r from-blue-100 to-blue-400 relative">
       <MessageList
         messages={messages}
         currentUserId={user?.uid}
