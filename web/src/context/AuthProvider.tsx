@@ -21,6 +21,7 @@ interface AuthContextType {
   error: AuthError | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
+  isAuth: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -31,7 +32,7 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setloading] = useState<boolean>(true);
-
+  const [isAuth, setIsAuth] = useState<boolean>(false);
   const [authState, setAuthState] = useState<{
     user: User | null;
     error: AuthError | null;
@@ -66,8 +67,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         error: null,
       });
     });
+    if (authState.user) {
+      setIsAuth(true);
+    }
     return () => unsubscribe();
-  }, [authState.user]);
+  }, [authState.user, isAuth]);
 
   useEffect(() => {
     const isAuthenticated = async () => {
@@ -77,7 +81,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isAuthenticated();
   }, []);
   return (
-    <AuthContext.Provider value={{ ...authState, login, logout, loading }}>
+    <AuthContext.Provider
+      value={{ ...authState, login, logout, loading, isAuth }}
+    >
       {children}
     </AuthContext.Provider>
   );
