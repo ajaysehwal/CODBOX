@@ -2,22 +2,12 @@ import React, { useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { User } from "firebase/auth";
-
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
 import { useAuth, useSocket } from "@/context";
-import { useGroupsStore } from "@/zustand";
+import { useGroupsStore, GroupUser } from "@/zustand";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SendHorizontal } from "lucide-react";
@@ -26,7 +16,7 @@ import { Button } from "../ui/button";
 interface Response {
   success: boolean;
   error?: string;
-  members: User[];
+  members: GroupUser[];
 }
 
 const MAX_DISPLAYED_MEMBERS = 4;
@@ -48,13 +38,10 @@ export default function GroupParticipants() {
   );
 
   const handleJoined = useCallback(
-    (user: User) => {
-      const isExist = members.some((member) => member.uid === user.uid);
-      if (!isExist) {
-        setNewGroupMember(user);
-      }
+    (user: GroupUser) => {
+      setNewGroupMember(user);
     },
-    [members, setNewGroupMember]
+    [setNewGroupMember]
   );
 
   const handleLeaved = useCallback(
@@ -69,13 +56,11 @@ export default function GroupParticipants() {
 
     socket.emit("getMembersList", groupId, handleGetMembersList);
     socket.on("joined", handleJoined);
-    socket.on("userleaved", handleLeaved);
-    socket.on("leaved", () => setMembers([]));
+    socket.on("leaved", handleLeaved);
 
     return () => {
       socket.off("joined", handleJoined);
-      socket.off("userleaved", handleLeaved);
-      socket.off("leaved");
+      socket.off("leaved", handleLeaved);
     };
   }, [
     socket,
@@ -85,7 +70,6 @@ export default function GroupParticipants() {
     handleLeaved,
     setMembers,
   ]);
-
   const displayedMembers = members.slice(0, MAX_DISPLAYED_MEMBERS);
 
   return (
@@ -97,23 +81,30 @@ export default function GroupParticipants() {
             totalCount={members.length}
           />
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[400px]">
+        <DropdownMenuContent className="w-[450px]">
           {members.map((member) => (
-            <React.Fragment key={member.uid}>
-              <DropdownMenuItem className="flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <Image
-                    className="rounded-full"
-                    src={member.photoURL as string}
-                    alt="img"
-                    width={35}
-                    height={35}
-                  />
-                  <div className="flex-col">
-                    <p className="text-sm">{member.displayName}</p>
-                    <p className="text-gray-400 text-[12px]">{member.email}</p>
-                  </div>
+            <DropdownMenuItem
+              key={member.uid}
+              className="flex justify-between items-center"
+            >
+              <div className="flex items-center gap-3">
+                <Image
+                  className="rounded-full"
+                  src={member.photoURL as string}
+                  alt="img"
+                  width={35}
+                  height={35}
+                />
+                <div className="flex-col">
+                  <p className="text-sm">{member.displayName}</p>
+                  <p className="text-gray-400 text-[12px]">{member.email}</p>
                 </div>
+              </div>
+              <div>
+                {member.type === "Host" && (
+                  <p className="text-gray-400 text-[13px]">{member.type}</p>
+                )}
+
                 {member.uid !== user?.uid && (
                   <div>
                     <Button size="icon" variant="outline">
@@ -121,9 +112,8 @@ export default function GroupParticipants() {
                     </Button>
                   </div>
                 )}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-            </React.Fragment>
+              </div>
+            </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
       </DropdownMenu>

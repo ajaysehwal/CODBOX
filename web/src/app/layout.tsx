@@ -41,9 +41,9 @@ export default function RootLayout({
         <AuthProvider>
           <SocketProvider>
             <ZegoEngineProvider>
-              <Navbar />
-              <Toaster />
-              {children}
+                <Navbar />
+                <Toaster />
+                {children}
             </ZegoEngineProvider>
           </SocketProvider>
         </AuthProvider>

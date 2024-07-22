@@ -144,14 +144,46 @@
 }
 
 .scrollbar-thumb-blue-500::-webkit-scrollbar-thumb {
-  background-color: rgb(254,235,137);
+  background-color: rgb(201,225,254);
   border-radius: 3px;
 }
 
 .scrollbar-track-blue-100::-webkit-scrollbar-track {
-  background-color: #dbeafe;
+  background-color: rgb(201,225,254);
 }
 
 .hover\:scrollbar-thumb-blue-700:hover::-webkit-scrollbar-thumb {
-  background-color: rgb(244, 223, 119);
+  background-color: rgb(178, 205, 239);
+}
+
+.sidebar-icon {
+  @apply relative flex items-center justify-center h-12 w-12 mt-2 mb-2 mx-auto 
+  bg-gray-800 text-green-500 hover:bg-green-600 hover:text-white
+  rounded-3xl hover:rounded-xl transition-all duration-300 ease-linear
+  cursor-pointer shadow-lg;
+}
+
+.sidebar-tooltip {
+  @apply absolute w-auto p-2 m-2 min-w-max bottom-full left-1/2 transform -translate-x-1/2
+  rounded-md shadow-md text-white bg-gray-900 
+  text-xs font-bold transition-all duration-100 scale-0 origin-bottom;
+}
+
+.sidebar-icon:hover .sidebar-tooltip {
+  @apply scale-100;
+}
+
+
+.toolbar button {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.toolbar button.active {
+  background-color: #ddd;
+}
+
+.cursor {
+  pointer-events: none;
+  z-index: 1000;
 }

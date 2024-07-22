@@ -16,7 +16,7 @@ type MessageListProps = {
     messagesEndRef,
   }: MessageListProps) => (
     <ul
-      className="h-[560px] overflow-y-auto p-4 space-y-4 backdrop-blur-sm rounded-lg
+      className="h-[515px] overflow-y-auto p-4 space-y-4 backdrop-blur-sm rounded-lg
                    scrollbar-thin scrollbar-thumb-blue-500 scrollbar-track-blue-100
                    hover:scrollbar-thumb-blue-700 transition-all duration-200"
     >

@@ -1,32 +1,53 @@
 import { create } from "zustand";
-import { generateRandomToken } from "@/utils";
 import { User } from "firebase/auth";
-
-interface TokenState {
-  token: string;
+export interface GroupUser extends User {
+  type: string;
 }
-export const useInviteTokenStore = create<TokenState>((set) => ({
-  token: generateRandomToken(16),
-}));
 interface Members {
-  members: User[];
+  members: GroupUser[];
   groupId: string;
-  setMembers: (members: User[]) => void;
+  setMembers: (members: GroupUser[]) => void;
   setGroupId: (groupId: string) => void;
-  setNewGroupMember: (member: User) => void;
+  setNewGroupMember: (member: GroupUser) => void;
   removeMember: (memberId: string) => void;
+}
+interface UserFile {
+  files: string[];
+  setFiles: (files: string[]) => void;
+  selectedFile: string;
+  setSelectedFile: (selectedFile: string) => void;
 }
 export const useGroupsStore = create<Members>((set) => ({
   members: [],
   groupId: "",
-  setMembers: (members: User[]) => set({ members }),
+  setMembers: (members: GroupUser[]) => set({ members }),
   setGroupId: (groupId: string) => set({ groupId }),
-  setNewGroupMember: (member: User) =>
-    set((state) => ({
-      members: [...state.members, member],
-    })),
+  setNewGroupMember: (member: GroupUser) =>
+    set((state) => {
+      const isExist = state.members.some((m) => m.uid === member.uid);
+      if (!isExist) {
+        return { members: [...state.members, member] };
+      }
+      return state;
+    }),
   removeMember: (memberId) =>
     set((state) => ({
       members: state.members.filter((member) => member.uid !== memberId),
     })),
+}));
+
+export const useUserFileStore = create<UserFile>((set) => ({
+  files: [],
+  setFiles: (files: string[]) => set({ files }),
+  selectedFile: "index.js",
+  setSelectedFile: (selectedFile: string) => set({ selectedFile }),
+}));
+
+interface BoxStore {
+  isBoxOpen: boolean;
+  setBoxOpen: (open: boolean) => void;
+}
+export const useBoxStore = create<BoxStore>((set) => ({
+  isBoxOpen: false,
+  setBoxOpen: (isBoxOpen: boolean) => set({ isBoxOpen }),
 }));

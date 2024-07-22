@@ -12,7 +12,6 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { User } from "firebase/auth";
-import { useGroupsStore } from "@/zustand";
 interface Response {
   success: boolean;
   error: string;
@@ -39,7 +38,7 @@ export const JoinGroup = ({
   };
   const JoinGroup = useCallback(
     (groupId: string) => {
-      if (groupId === "" || groupId.length !== 16) {
+      if (groupId === "") {
         Error("Invalid Token", "Please enter a valid token");
         setJoinLoad(true);
         return;
@@ -74,6 +73,7 @@ export const JoinGroup = ({
           onChange={(e) => setJoiningToken(e.target.value)}
         />
         <Button
+          onKeyPress={(e) => e.key === "Enter" && JoinGroup(joiningToken)}
           disabled={!joinLoad}
           onClick={() => JoinGroup(joiningToken)}
           className="bg-green-800 text-white hover:bg-green-500 flex gap-2 items-center justify-center"

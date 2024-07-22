@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useCallback } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useGroupsStore, useInviteTokenStore } from "@/zustand";
+import { useGroupsStore } from "@/zustand";
 import { Account, JoinGroup, CreateGroup, LeaveGroup, Invite } from ".";
 import { useAuth, useSocket, useZegoEngine } from "@/context";
 import ZegoLocalStream from "zego-express-engine-webrtc/sdk/code/zh/ZegoLocalStream.web";
@@ -23,7 +23,6 @@ export default function Navbar() {
   const socket = useSocket();
   const searchParams = useSearchParams();
   const groupId = searchParams.get("id") as string;
-  const { token } = useInviteTokenStore();
   const { user } = useAuth();
   const { zegoEngine } = useZegoEngine();
   const [localStream, SetLocalStream] = useState<ZegoLocalStream | null>(null);
@@ -34,7 +33,7 @@ export default function Navbar() {
       if (groupId && user) {
         try {
           console.log("joined");
-          // SetUpVoiceConnection(groupId, audioToken, user);
+          // voiceConnection(groupId, audioToken, user);
         } catch (error) {
           toast({
             variant: "destructive",
@@ -47,7 +46,7 @@ export default function Navbar() {
     },
     [socket, zegoEngine, groupId]
   );
-  const SetUpVoiceConnection = async (
+  const voiceConnection = async (
     groupId: string,
     token: string,
     user: User
@@ -107,7 +106,7 @@ export default function Navbar() {
                   </div>
                 </>
               ) : (
-                <CreateGroup groupId={token} Join={Join} />
+                <CreateGroup Join={Join} />
               )}
               <Account />
             </>

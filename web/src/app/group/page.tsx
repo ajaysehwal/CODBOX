@@ -54,10 +54,12 @@ export default function GroupPage() {
       }
     );
   };
+  if (!groupId) {
+    redirect("/");
+  }
   useEffect(() => {
     if (socket) {
-      socket.emit("IsGroupValid", groupId);
-      socket.on("IsGroupValid", (isValid: boolean) => {
+      socket.emit("ValidateGroup", groupId, (isValid: boolean) => {
         if (!isValid) {
           Error("Group is not exist");
           setTimeout(() => {
@@ -68,16 +70,10 @@ export default function GroupPage() {
           Rejoin();
         }
       });
-      if (groupId) {
-        socket.emit("onDisconnect", groupId, user);
-      }
     }
     return () => {
-      socket?.off("IsGroupValid");
+      socket?.off("ValidateGroup");
     };
   }, [socket, groupId, router]);
-  if (!groupId || groupId.trim().length !== 16) {
-    redirect("/");
-  }
   return <Home />;
 }
