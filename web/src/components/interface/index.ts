@@ -34,6 +34,7 @@ export interface SubmissionResult {
   memory?: any;
 }
 
+import { User } from "firebase/auth";
 import { DEFAULT_LANGUAGE, DEFAULT_THEME } from "../constants";
 export type Language = (typeof DEFAULT_LANGUAGE)[number];
 export type Theme = (typeof DEFAULT_THEME)[number];
@@ -57,4 +58,20 @@ export interface CodeChange {
     endLineNumber: number;
     endColumn: number;
   };
+}
+
+export interface Group {
+  id: string;
+  members: string[];
+  messages: Message[];
+  sourceCode: string;
+  createdAt: string;
+  membersInfo: User[];
+}
+
+export interface Message {
+  id: string;
+  sender: string;
+  content: string;
+  timestamp: string;
 }

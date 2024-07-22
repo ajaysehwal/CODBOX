@@ -39,12 +39,9 @@ export default function GroupParticipants() {
 
   const handleJoined = useCallback(
     (user: GroupUser) => {
-      const isExist = members.some((member) => member.uid === user.uid);
-      if (!isExist) {
-        setNewGroupMember(user);
-      }
+      setNewGroupMember(user);
     },
-    [members, setNewGroupMember]
+    [setNewGroupMember]
   );
 
   const handleLeaved = useCallback(
@@ -59,13 +56,11 @@ export default function GroupParticipants() {
 
     socket.emit("getMembersList", groupId, handleGetMembersList);
     socket.on("joined", handleJoined);
-    socket.on("userleaved", handleLeaved);
-    socket.on("leaved", () => setMembers([]));
+    socket.on("leaved", handleLeaved);
 
     return () => {
       socket.off("joined", handleJoined);
-      socket.off("userleaved", handleLeaved);
-      socket.off("leaved");
+      socket.off("leaved", handleLeaved);
     };
   }, [
     socket,

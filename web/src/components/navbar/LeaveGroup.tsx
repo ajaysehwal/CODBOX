@@ -23,33 +23,48 @@ export const LeaveGroup = ({
   const { toast } = useToast();
   const [LeaveLoad, setLeaveLoad] = useState<boolean>(true);
   const { zegoEngine } = useZegoEngine();
-  const { removeMember } = useGroupsStore();
+  const { members, removeMember, setMembers } = useGroupsStore();
   const { user } = useAuth();
   const LeaveGroup = useCallback(
     (groupId: string) => {
       setLeaveLoad(false);
+      console.log(members.length === 1);
       const id = setTimeout(() => {
-        socket?.emit("leaveGroup", groupId, user, (response: Response) => {
-          if (response.success) {
-            removeMember(user?.uid as string);
-            VoiceDISCONNECTION(groupId);
-            router.push("/");
-          } else {
-            toast({
-              variant: "destructive",
-              title: response.error,
-              description: "Please return home page manually",
-              action: <ToastAction altText="Try again">Try again</ToastAction>,
+        try {
+          if (members.length === 1) {
+            socket?.emit("closeGroup", groupId, (result: boolean) => {
+              if (!result) {
+                Error("Error Occured while closing group");
+              } else {
+                setMembers([]);
+              }
             });
-            setLeaveLoad(true);
+          } else {
+            socket?.emit(
+              "leaveGroup",
+              groupId,
+              user?.uid,
+              (response: Response) => {
+                if (!response.success) {
+                  Error(response.error);
+                }
+              }
+            );
           }
-        });
-      }, 2000);
+          router.push("/");
+          disconnectAudio(groupId);
+        } catch (error) {
+          Error("Error Occured while leaving group");
+        } finally {
+          setLeaveLoad(true);
+        }
+      }, 500);
       return () => clearTimeout(id);
     },
+
     [socket, router]
   );
-  const VoiceDISCONNECTION = useCallback(
+  const disconnectAudio = useCallback(
     async (groupId: string) => {
       if (zegoEngine && localStream) {
         zegoEngine.destroyStream(localStream);
@@ -58,7 +73,14 @@ export const LeaveGroup = ({
     },
     [localStream, groupId, zegoEngine]
   );
-
+  const Error = (error: string) => {
+    return toast({
+      variant: "destructive",
+      title: error,
+      description: "Please return home page manually",
+      action: <ToastAction altText="Try again">Try again</ToastAction>,
+    });
+  };
   return (
     <Button
       disabled={!LeaveLoad}

@@ -7,17 +7,17 @@ import { ToastAction } from "../ui/toast";
 import { Button } from "../ui/button";
 import { User } from "firebase/auth";
 import { useGroupsStore } from "@/zustand";
+import { Group } from "../interface";
 
 interface Response {
   success: boolean;
   error?: string;
-  AudioToken: string;
+  audioToken: string;
+  group: Group;
 }
 export const CreateGroup = ({
-  groupId,
   Join,
 }: {
-  groupId: string;
   Join: (groupId: string, user: User, audioToken: string) => Promise<void>;
 }) => {
   const router = useRouter();
@@ -26,41 +26,33 @@ export const CreateGroup = ({
   const { user } = useAuth();
   const [createLoad, setCreateLoad] = useState<boolean>(true);
   const { setGroupId } = useGroupsStore();
-  const createGroup = useCallback(
-    (groupId: string) => {
-      setCreateLoad(false);
-      const id = setTimeout(() => {
-        socket?.emit(
-          "createGroup",
-          groupId,
-          user,
-          async (response: Response) => {
-            if (response.success) {
-              setGroupId(groupId);
-              await Join(groupId, user as User, response.AudioToken);
-              router.push(`/group?id=${groupId}`);
-            } else {
-              toast({
-                variant: "destructive",
-                title: response.error,
-                description: "There was a problem with your request.",
-                action: (
-                  <ToastAction altText="Try again">Try again</ToastAction>
-                ),
-              });
-              setCreateLoad(true);
-            }
-          }
-        );
-      }, 500);
-      return () => clearTimeout(id);
-    },
-    [socket, router]
-  );
+  const createGroup = useCallback(() => {
+    setCreateLoad(false);
+    const id = setTimeout(() => {
+      socket?.emit("createGroup", user, async (response: Response) => {
+        console.log(response);
+        if (response.success) {
+          const group = response.group;
+          setGroupId(group.id);
+          await Join(group.id, user as User, response.audioToken);
+          router.push(`/group?id=${group.id}`);
+        } else {
+          toast({
+            variant: "destructive",
+            title: response.error,
+            description: "There was a problem with your request.",
+            action: <ToastAction altText="Try again">Try again</ToastAction>,
+          });
+          setCreateLoad(true);
+        }
+      });
+    }, 500);
+    return () => clearTimeout(id);
+  }, [socket, router]);
   return (
     <Button
       disabled={!createLoad}
-      onClick={() => createGroup(groupId)}
+      onClick={() => createGroup()}
       className="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-xl border border-transparent bg-lime-400 text-black hover:bg-lime-500 transition disabled:opacity-50 disabled:pointer-events-none focus:outline-none focus:bg-lime-500"
     >
       {!createLoad ? (
