@@ -1,8 +1,5 @@
-import { networkRequest } from "./networkRequest";
 import { Language, Response } from "../components/interface";
-
-const api = new networkRequest("BASE");
-
+import { POST } from "../lib/api";
 export const evalCodeService = {
   evaluate: async (
     sourceCode: string,
@@ -10,20 +7,11 @@ export const evalCodeService = {
     userId?: string
   ): Promise<Response> => {
     try {
-      const response = await api.post<Response>("/v1/evaluate", {
+      const response = await POST<Response>("/v1/evaluate", {
         source_code: sourceCode,
         language,
         user_id: userId,
       });
-      console.log(response)
-
-      if (response.error) {
-        return {
-          success: false,
-          error: response.error,
-        };
-      }
-
       if (response.data) {
         return {
           success: true,
