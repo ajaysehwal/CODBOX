@@ -1,50 +1,15 @@
-// "use client";
-// import { usePathname } from "next/navigation";
-// import CodeEditor from "@/components/codeEditor/editor";
-// import ChatSection from "@/components/chat/chat";
-// import { useEffect } from "react";
-// import PreviousNotes from "@/components/history/PreviousNotes";
-// import Right from "@/components/sidebars/Right";
-// export default function Home() {
-//   const pathname = usePathname();
-//   useEffect(() => {
-//     setTimeout(() => {
-//       console.clear();
-//     }, 50);
-//   }, []);
-//   return (
-//     <main className="relative w-full">
-//       <div className="grid grid-cols-8 w-full">
-//         <div className="col-span-7  h-[90vh]">
-//           <CodeEditor />
-//         </div>
-//         {pathname === "/group" ? (
-//           <div className="hidden lg:block duration-300 transform">
-//             <Right />
-//           </div>
-//         ) : (
-//           <div className="duration-300 transform">
-//             <PreviousNotes />
-//           </div>
-//         )}
-//       </div>
-//     </main>
-//   );
-// }
-
 "use client";
-
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import CodeEditor from "@/components/codeEditor/editor";
-import ChatSection from "@/components/chat/chat";
-import PreviousNotes from "@/components/history/PreviousNotes";
+import Editor from "@/components/Editor/editor";
 import Right from "@/components/sidebars/Right";
+import { useEditorToggle } from "@/zustand";
+import Board from "@/components/whiteboard/borad";
 
 export default function Home() {
   const pathname = usePathname();
   const [isMobile, setIsMobile] = useState(false);
-
+  const { isEditorOpen } = useEditorToggle();
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024);
@@ -66,7 +31,7 @@ export default function Home() {
     <main className="relative w-full">
       <div className="flex w-full">
         <div className="flex-grow w-full lg:w-[93%] h-[90vh]">
-          <CodeEditor />
+          <Editor />
         </div>
         {!isMobile && (
           <div className="w-[7%] transition-all duration-300 transform">

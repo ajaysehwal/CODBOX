@@ -51,3 +51,13 @@ export const useBoxStore = create<BoxStore>((set) => ({
   isBoxOpen: false,
   setBoxOpen: (isBoxOpen: boolean) => set({ isBoxOpen }),
 }));
+
+interface EditorToogle {
+  isEditorOpen: boolean;
+  setEditorOpen: (isEditorOpen: boolean) => void;
+}
+
+export const useEditorToggle = create<EditorToogle>((set) => ({
+  isEditorOpen: false,
+  setEditorOpen: (isEditorOpen: boolean) => set({ isEditorOpen }),
+}));

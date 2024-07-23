@@ -75,3 +75,23 @@ export interface Message {
   content: string;
   timestamp: string;
 }
+
+export type ShapeType = "rectangle" | "circle" | "text" | "freehand";
+export type ToolType = "pencil" | "eraser" | "rectangle" | "circle" | "text" | "select";
+
+export interface Point {
+  x: number;
+  y: number;
+}
+
+export interface Shape {
+  id: number;
+  type: ShapeType;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  text?: string;
+  points?: Point[];
+}

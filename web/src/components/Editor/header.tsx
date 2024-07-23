@@ -23,8 +23,9 @@ import { Input } from "../ui/input";
 import { useAuth } from "@/context";
 import GoogleSignIn from "../navbar/signIn";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { useUserFileStore } from "@/zustand";
+import { useEditorToggle, useUserFileStore } from "@/zustand";
 import { POST, GET } from "@/lib/api";
+import { useCodeFile } from "@/hooks";
 interface EditorHeaderProps {
   theme: Theme;
   language: Language;
@@ -40,6 +41,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
   onLanguageChange,
   onEvalCode,
 }) => {
+  const { isEditorOpen, setEditorOpen } = useEditorToggle();
   const searchParams = useSearchParams();
   const groupId = searchParams.get("id") as string;
   return (
@@ -47,6 +49,12 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
       <Files />
       <Themes onThemeChange={onThemeChange} theme={theme} />
       <Languages onLanguageChange={onLanguageChange} language={language} />
+      <Button
+        onClick={() => setEditorOpen(!isEditorOpen)}
+        className="w-[180px] bg-white text-black hover:bg-gray-200"
+      >
+        {isEditorOpen ? "CodeEditor" : "Whiteboard"}
+      </Button>
       <RunCode run={onEvalCode} />
       {groupId && <GroupParticipants />}
     </div>
@@ -152,14 +160,10 @@ const RunCode = ({ run }: { run: () => void }) => {
 
 const Files = () => {
   const { user } = useAuth();
-  const { setFiles, files } = useUserFileStore();
-  const GetFiles = async (userId: string) => {
-    const result: any = await GET(`file/${userId}`);
-    if (result.data) {
-      const files = result.data.files as string[];
-      setFiles(files);
-    }
-  };
+  const { files } = useUserFileStore();
+  const [filename, setFileName] = useState<string>("");
+  const { createNewFile, getAllFiles } = useCodeFile();
+
   const createIndexFile = async () => {
     await POST(
       "/file/create/index",
@@ -178,9 +182,10 @@ const Files = () => {
       createIndexFile();
     }
     if (user) {
-      GetFiles(user?.uid);
+      getAllFiles(user?.uid);
     }
   }, [user?.uid]);
+
   return (
     <Select>
       <SelectTrigger className="w-[180px]">
@@ -188,8 +193,12 @@ const Files = () => {
       </SelectTrigger>
       <SelectContent className="w-[400px]">
         <div className="flex items-center gap-2 justify-center">
-          <Input placeholder="create new file" />
-          <Button>Create</Button>
+          <Input
+            placeholder="create new file"
+            value={filename}
+            onChange={(e) => setFileName(e.target.value)}
+          />
+          <Button onClick={() => createNewFile(filename)}>Create</Button>
         </div>
         {files.map((file) => (
           <SelectItem key={file} value={file}>

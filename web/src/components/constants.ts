@@ -20,3 +20,6 @@ export const CANVAS_SIZE = {
   width: 3500,
   height: 2000,
 };
+
+export const INITIAL_COLOR = "#111111";
+export const INITIAL_LINE_WIDTH = 5;

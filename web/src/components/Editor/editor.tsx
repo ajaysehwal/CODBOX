@@ -1,20 +1,22 @@
 "use client";
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { useCodeEditor } from "../../hooks/useCodeEditor";
+import { useCodeEditor, useCodeFile, useCompilation } from "@/hooks";
 import { EditorHeader } from "./header";
 import { CodeOutput } from "./output";
 import { ResizableEditor } from "../ui/ResizableEditor";
-import { useCompilation } from "../../hooks/useCompilation";
-import { useFileContent } from "../../hooks/useFileContent";
-import { useBoxStore } from "@/zustand";
+import { useBoxStore, useEditorToggle } from "@/zustand";
+
+const Whiteboard = dynamic(() => import("../whiteboard/board"), {
+  ssr: false,
+});
 
 const MonacoEditor = dynamic(
   () => import("@monaco-editor/react").then((mod) => mod.default),
   { ssr: false }
 );
 
-export default function CodeEditor() {
+export default function Editor() {
   const {
     language,
     theme,
@@ -28,6 +30,9 @@ export default function CodeEditor() {
   const { isOutputOpen, isCompiling, compileResponse, evalCode } =
     useCompilation(code, language);
   const { isBoxOpen } = useBoxStore();
+  const { isEditorOpen } = useEditorToggle();
+  const { fileCode } = useCodeFile();
+ 
   return (
     <ResizableEditor
       header={
@@ -40,27 +45,31 @@ export default function CodeEditor() {
         />
       }
       editor={
-        <MonacoEditor
-          height="85vh"
-          language={language}
-          theme={theme}
-          value={code}
-          onChange={handleEditorChange}
-          onMount={handleEditorDidMount}
-          options={{
-            readOnly: !isHost,
-            glyphMargin: true,
-            minimap: {
-              enabled: !isBoxOpen,
-            },
-            hover: {
-              enabled: true,
-            },
-            scrollbar: {
-              vertical: "hidden",
-            },
-          }}
-        />
+        isEditorOpen ? (
+          <Whiteboard />
+        ) : (
+          <MonacoEditor
+            height="85vh"
+            language={language}
+            theme={theme}
+            value={code}
+            onChange={handleEditorChange}
+            onMount={handleEditorDidMount}
+            options={{
+              readOnly: !isHost,
+              glyphMargin: true,
+              minimap: {
+                enabled: !isBoxOpen,
+              },
+              hover: {
+                enabled: true,
+              },
+              scrollbar: {
+                vertical: "hidden",
+              },
+            }}
+          />
+        )
       }
       output={
         isOutputOpen && (
