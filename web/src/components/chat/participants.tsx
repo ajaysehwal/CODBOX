@@ -10,8 +10,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SendHorizontal } from "lucide-react";
+import { SendHorizontal, Users, Crown } from "lucide-react";
 import { Button } from "../ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Response {
   success: boolean;
@@ -28,6 +29,7 @@ export default function GroupParticipants() {
   const searchParams = useSearchParams();
   const groupId = searchParams.get("id") as string;
   const { user } = useAuth();
+
   const handleGetMembersList = useCallback(
     (response: Response) => {
       if (response.success) {
@@ -70,51 +72,65 @@ export default function GroupParticipants() {
     handleLeaved,
     setMembers,
   ]);
+
   const displayedMembers = members.slice(0, MAX_DISPLAYED_MEMBERS);
 
   return (
     <div>
       <DropdownMenu>
-        <DropdownMenuTrigger className="w-[200px] p-2 border-none bg-white outline-none">
+        <DropdownMenuTrigger className="p-2 bg-white rounded-full hover:bg-gray-50 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2 shadow-sm">
           <MemberAvatars
             members={displayedMembers}
             totalCount={members.length}
           />
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[450px]">
-          {members.map((member) => (
-            <DropdownMenuItem
-              key={member.uid}
-              className="flex justify-between items-center"
-            >
-              <div className="flex items-center gap-3">
-                <Image
-                  className="rounded-full"
-                  src={member.photoURL as string}
-                  alt="img"
-                  width={35}
-                  height={35}
-                />
-                <div className="flex-col">
-                  <p className="text-sm">{member.displayName}</p>
-                  <p className="text-gray-400 text-[12px]">{member.email}</p>
-                </div>
-              </div>
-              <div>
-                {member.type === "Host" && (
-                  <p className="text-gray-400 text-[13px]">{member.type}</p>
-                )}
-
-                {member.uid !== user?.uid && (
-                  <div>
-                    <Button size="icon" variant="outline">
-                      <SendHorizontal className="text-blue-700" />
-                    </Button>
+        <DropdownMenuContent className="w-96 bg-white rounded-2xl shadow-2xl border border-gray-100">
+          <div className="sticky top-0 bg-white p-3 border-b border-gray-100">
+            <h3 className="text-1xl font-bold text-gray-800">Group Members</h3>
+            <p className="text-sm text-gray-500 mt-1">
+              {members.length} participants
+            </p>
+          </div>
+          <ScrollArea className="h-[50vh]">
+            <div className="p-4">
+              {members.map((member) => (
+                <DropdownMenuItem
+                  key={member.uid}
+                  className="flex items-center justify-between p-3 hover:bg-blue-50 rounded-xl transition-all duration-200 mb-2"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <Image
+                        className="rounded-full"
+                        src={member.photoURL as string}
+                        alt={`${member.displayName}'s avatar`}
+                        width={42}
+                        height={42}
+                      />
+                      {member.type === "Host" && (
+                        <Crown className="w-5 h-5 text-yellow-500 absolute -top-1 -right-1" />
+                      )}
+                    </div>
+                    <div className="flex-col">
+                      <p className="text-sm font-semibold text-gray-800">
+                        {member.displayName}
+                      </p>
+                      <p className="text-xs text-gray-500">{member.email}</p>
+                    </div>
                   </div>
-                )}
-              </div>
-            </DropdownMenuItem>
-          ))}
+                  {member.uid !== user?.uid && (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-100 rounded-full p-2"
+                    >
+                      <SendHorizontal className="w-5 h-5" />
+                    </Button>
+                  )}
+                </DropdownMenuItem>
+              ))}
+            </div>
+          </ScrollArea>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
@@ -128,16 +144,17 @@ interface MemberAvatarsProps {
 
 function MemberAvatars({ members, totalCount }: MemberAvatarsProps) {
   return (
-    <div className="flex -space-x-2 m-auto items-center justify-center">
+    <div className="flex items-center -space-x-3">
       {members.map((member, i) => (
-        <Image
-          key={member.uid}
-          width={28}
-          height={28}
-          className="inline-block rounded-full dark:ring-neutral-900"
-          src={member.photoURL as string}
-          alt={`${member.displayName || "Member"}'s avatar`}
-        />
+        <div key={member.uid} className="relative inline-block">
+          <Image
+            width={36}
+            height={36}
+            className="rounded-full ring-2 ring-white"
+            src={member.photoURL as string}
+            alt={`${member.displayName || "Member"}'s avatar`}
+          />
+        </div>
       ))}
       <MemberCount count={totalCount} />
     </div>
@@ -146,8 +163,8 @@ function MemberAvatars({ members, totalCount }: MemberAvatarsProps) {
 
 function MemberCount({ count }: { count: number }) {
   return (
-    <button className="hs-dropdown-toggle inline-flex items-center justify-center size-[30px] rounded-full bg-gray-100 border-2 border-white font-medium text-gray-700 shadow-sm align-middle transition-all text-sm dark:bg-neutral-700 dark:hover:bg-neutral-600 dark:border-neutral-800 dark:text-neutral-400 dark:hover:text-white dark:focus:bg-blue-100 dark:focus:text-blue-600 dark:focus:ring-offset-gray-800">
-      <span className="font-medium leading-none">{count}</span>
-    </button>
+    <div className="flex items-center justify-center w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-semibold text-xs shadow-md">
+      <Users className="w-5 h-5" />
+    </div>
   );
 }

@@ -1,6 +1,5 @@
 export * from "./useAPI";
 export * from "./useBoardTools";
-export * from "./useWhiteBoard";
 export * from "./useCodeEditor";
 export * from "./useCodeSync";
 export * from "./useCompilation";

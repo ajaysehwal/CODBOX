@@ -6,6 +6,8 @@ import { AuthProvider, SocketProvider } from "@/context";
 import Navbar from "@/components/navbar/navbar";
 import { Toaster } from "@/components/ui/toaster";
 import dynamic from "next/dynamic";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ZegoEngineProvider = dynamic(
   () =>
@@ -41,9 +43,10 @@ export default function RootLayout({
         <AuthProvider>
           <SocketProvider>
             <ZegoEngineProvider>
-                <Navbar />
-                <Toaster />
-                {children}
+              <Navbar />
+              <Toaster />
+              <ToastContainer />
+              {children}
             </ZegoEngineProvider>
           </SocketProvider>
         </AuthProvider>

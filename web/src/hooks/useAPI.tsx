@@ -1,11 +1,15 @@
-// useApi.ts
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { GET, POST, PUT, DELETE, ApiResponse } from "../lib/api";
 import { AxiosRequestConfig } from "axios";
 
+interface ApiError {
+  message: string;
+}
+
 interface UseApiState<T> extends ApiResponse<T> {
   isLoading: boolean;
+  error: ApiError | null;
 }
 
 export function useApi<T>(
@@ -50,7 +54,7 @@ export function useApi<T>(
         if (isMounted) {
           setState({
             data: null,
-            error: error instanceof Error ? error.message : "An unknown error occurred",
+            error: error instanceof Error ? { message: error.message } : { message: "An unknown error occurred" },
             isLoading: false,
           });
         }

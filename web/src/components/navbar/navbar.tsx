@@ -32,8 +32,7 @@ export default function Navbar() {
     async (groupId: string, user: User, audioToken: string) => {
       if (groupId && user) {
         try {
-          console.log("joined");
-          // voiceConnection(groupId, audioToken, user);
+          voiceConnection(groupId, audioToken, user);
         } catch (error) {
           toast({
             variant: "destructive",
@@ -72,8 +71,8 @@ export default function Navbar() {
         aria-label="Global"
       >
         <div className="md:col-span-3">
-          <h1 className="scroll-m-20 text-2xl font-extrabold tracking-tight lg:text-3xl">
-            CodeXF
+          <h1 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">
+            Code<span className="text-blue-500">XF</span>
           </h1>
         </div>
         <div className="flex items-center gap-x-2 py-1 ms-auto md:ps-6 md:order-3 md:col-span-3">
@@ -93,9 +92,9 @@ export default function Navbar() {
                           <Button
                             variant="outline"
                             size="icon"
-                            className="rounded-full"
+                            className="rounded-full p-2 border-2 border-blue-200 bg-white hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 ease-in-out shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-300 focus:ring-offset-2"
                           >
-                            <MessageCircleMore className="w-8 h-8" />
+                            <MessageCircleMore className="w-6 h-6 text-blue-500 hover:text-blue-600 transition-colors duration-300" />
                           </Button>
                         </MenubarTrigger>
                         <MenubarContent className="w-[350px]">

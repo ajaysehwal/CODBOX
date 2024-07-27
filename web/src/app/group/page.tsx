@@ -8,11 +8,11 @@ import { ToastAction } from "@/components/ui/toast";
 import { useGroupsStore } from "@/zustand";
 export default function GroupPage() {
   const searchParams = useSearchParams();
+  const groupId = searchParams.get("id") as string;
   const socket = useSocket();
   const router = useRouter();
   const { toast } = useToast();
   const { zegoEngine } = useZegoEngine();
-  const groupId = searchParams.get("id") as string;
   const { user } = useAuth();
   const { setGroupId } = useGroupsStore();
   const Error = (error: string, desc?: string) => {
@@ -36,20 +36,21 @@ export default function GroupPage() {
         if (!response.success) {
           Error("Please Join Group by entering token in  join other section");
         } else {
-          // if (zegoEngine) {
-          //   await zegoEngine.loginRoom(groupId, response.AudioToken, {
-          //     userID: user?.uid as string,
-          //     userName: user?.email as string,
-          //   });
-          //   const localStream = await zegoEngine.createZegoStream({
-          //     camera: { audio: true, video: false },
-          //     audioBitrate: 192,
-          //   });
-          //   zegoEngine.startPublishingStream(
-          //     `${user?.uid}_stream`,
-          //     localStream
-          //   );
-          // }
+          console.log("token: " + response)
+          if (zegoEngine) {
+            await zegoEngine.loginRoom(groupId, response.AudioToken, {
+              userID: user?.uid as string,
+              userName: user?.email as string,
+            });
+            const localStream = await zegoEngine.createZegoStream({
+              camera: { audio: true, video: false },
+              audioBitrate: 192,
+            });
+            zegoEngine.startPublishingStream(
+              `${user?.uid}_stream`,
+              localStream
+            );
+          }
         }
       }
     );

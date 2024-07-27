@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { MessageCircle, Bell, User, Settings } from "lucide-react";
 import { useBoxStore } from "@/zustand";
 import { motion, AnimatePresence } from "framer-motion";
 import ChatSection from "../chat/chat";
 import { useSearchParams } from "next/navigation";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { NotificationDialog } from "./NotificationDialog";
+import { ProfileDialog } from "./ProfileDialog";
+import { SettingsDialog } from "./SettingDialog";
 
 export default function Right() {
   const { isBoxOpen, setBoxOpen } = useBoxStore();
@@ -31,7 +35,7 @@ export default function Right() {
 
   return (
     <>
-      <div className="fixed left-0 top-0 h-full w-full flex flex-col items-start justify-center space-y-8 bg-[rgb(217,232,254)] text-white shadow-lg z-50">
+      <div className="fixed left-0 top-0 w-full h-[90vh] flex flex-col items-start justify-center space-y-8 bg-[rgb(217,232,254)] text-white z-50">
         {groupId && (
           <SidebarIcon
             icon={<MessageCircle size={24} />}
@@ -39,22 +43,38 @@ export default function Right() {
             onClick={() => handleIconClick("Chat")}
           />
         )}
+        <Dialog>
+          <DialogTrigger asChild>
+            <SidebarIcon
+              icon={<Bell size={24} />}
+              label="Notifications"
+              onClick={() => handleIconClick("Notifications")}
+              badge={10}
+            />
+          </DialogTrigger>
+          <NotificationDialog />
+        </Dialog>
 
-        <SidebarIcon
-          icon={<Bell size={24} />}
-          label="Notifications"
-          onClick={() => handleIconClick("Notifications")}
-        />
-        <SidebarIcon
-          icon={<User size={24} />}
-          label="Profile"
-          onClick={() => handleIconClick("Profile")}
-        />
-        <SidebarIcon
-          icon={<Settings size={24} />}
-          label="Settings"
-          onClick={() => handleIconClick("Settings")}
-        />
+        <Dialog>
+          <DialogTrigger asChild>
+            <SidebarIcon
+              icon={<User size={24} />}
+              label="Profile"
+              onClick={() => {}}
+            />
+          </DialogTrigger>
+          <ProfileDialog />
+        </Dialog>
+        <Dialog>
+          <DialogTrigger asChild>
+            <SidebarIcon
+              icon={<Settings size={24} />}
+              label="Settings"
+              onClick={() => handleIconClick("Settings")}
+            />
+          </DialogTrigger>
+          <SettingsDialog />
+        </Dialog>
       </div>
       <AnimatePresence>{isBoxOpen && <ChatBox />}</AnimatePresence>
     </>
@@ -65,13 +85,24 @@ interface SidebarIconProps {
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
+  badge?: number;
 }
 
-const SidebarIcon: React.FC<SidebarIconProps> = ({ icon, label, onClick }) => {
+const SidebarIcon: React.FC<SidebarIconProps> = ({
+  icon,
+  label,
+  onClick,
+  badge,
+}) => {
   return (
     <div className="sidebar-icon group" onClick={onClick}>
       <span className="sidebar-tooltip group-hover:scale-100">{label}</span>
       {icon}
+      {badge && (
+        <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+          {badge > 99 ? "99+" : badge}
+        </div>
+      )}
     </div>
   );
 };

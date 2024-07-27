@@ -11,12 +11,6 @@ interface Members {
   setNewGroupMember: (member: GroupUser) => void;
   removeMember: (memberId: string) => void;
 }
-interface UserFile {
-  files: string[];
-  setFiles: (files: string[]) => void;
-  selectedFile: string;
-  setSelectedFile: (selectedFile: string) => void;
-}
 export const useGroupsStore = create<Members>((set) => ({
   members: [],
   groupId: "",
@@ -36,11 +30,34 @@ export const useGroupsStore = create<Members>((set) => ({
     })),
 }));
 
+interface UserFile {
+  files: string[];
+  setFiles: (files: string[]) => void;
+  selectedFile: string;
+  setSelectedFile: (selectedFile: string) => void;
+  addNewFile: (file: string) => void;
+  personalCode: string;
+  setPersonalCode: (personalCode: string) => void;
+}
 export const useUserFileStore = create<UserFile>((set) => ({
   files: [],
   setFiles: (files: string[]) => set({ files }),
   selectedFile: "index.js",
   setSelectedFile: (selectedFile: string) => set({ selectedFile }),
+  addNewFile: (file: string) =>
+    set((state) => {
+      const isExist = state.files.some((el) => el === file);
+      if (!isExist) {
+        return { files: [...state.files, file] };
+      }
+      return state;
+    }),
+  removeFile: (fileId: number) =>
+    set((state) => ({
+      files: state.files.filter((_, i) => i !== fileId),
+    })),
+  personalCode: "",
+  setPersonalCode: (personalCode: string) => set({ personalCode }),
 }));
 
 interface BoxStore {
@@ -60,4 +77,13 @@ interface EditorToogle {
 export const useEditorToggle = create<EditorToogle>((set) => ({
   isEditorOpen: false,
   setEditorOpen: (isEditorOpen: boolean) => set({ isEditorOpen }),
+}));
+
+interface DrawerStore {
+  drawerOpen: boolean;
+  setDrawerOpen: (drawerOpen: boolean) => void;
+}
+export const useDrawerStore = create<DrawerStore>((set) => ({
+  drawerOpen: false,
+  setDrawerOpen: (drawerOpen: boolean) => set({ drawerOpen }),
 }));
