@@ -32,7 +32,6 @@ export function useCodeEditor() {
     []
   );
   const { syncCode, emitCodeChange } = useCodeSync(
-    socket,
     groupId,
     editorRef,
     setCode

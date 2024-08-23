@@ -5,18 +5,14 @@ import { useToast } from "../ui/use-toast";
 import { useState, useCallback } from "react";
 import { ToastAction } from "../ui/toast";
 import { Button } from "../ui/button";
-import ZegoLocalStream from "zego-express-engine-webrtc/sdk/code/zh/ZegoLocalStream.web";
 import { useGroupsStore } from "@/zustand";
 import { Spinner } from "../ui/spinner";
+import { Events } from "../constants";
 interface Response {
   success: boolean;
   error: string;
 }
-export const LeaveGroup = ({
-  localStream,
-}: {
-  localStream: ZegoLocalStream | null;
-}) => {
+export const LeaveGroup = () => {
   const searchParams = useSearchParams();
   const groupId = searchParams.get("id") as string;
   const router = useRouter();
@@ -42,7 +38,7 @@ export const LeaveGroup = ({
             });
           } else {
             socket?.emit(
-              "leaveGroup",
+              Events.GROUP.LEAVE,
               groupId,
               user?.uid,
               (response: Response) => {
@@ -53,7 +49,7 @@ export const LeaveGroup = ({
             );
           }
           router.push("/");
-          disconnectAudio(groupId);
+          // disconnectAudio(groupId);
         } catch (error) {
           Error("Error Occured while leaving group");
         } finally {
@@ -65,15 +61,15 @@ export const LeaveGroup = ({
 
     [socket, router]
   );
-  const disconnectAudio = useCallback(
-    async (groupId: string) => {
-      if (zegoEngine && localStream) {
-        zegoEngine.destroyStream(localStream);
-        zegoEngine.logoutRoom(groupId);
-      }
-    },
-    [localStream, groupId, zegoEngine]
-  );
+  // const disconnectAudio = useCallback(
+  //   async (groupId: string) => {
+  //     if (zegoEngine && localStream) {
+  //       zegoEngine.destroyStream(localStream);
+  //       zegoEngine.logoutRoom(groupId);
+  //     }
+  //   },
+  //   [localStream, groupId, zegoEngine]
+  // );
   const Error = (error: string) => {
     return toast({
       variant: "destructive",

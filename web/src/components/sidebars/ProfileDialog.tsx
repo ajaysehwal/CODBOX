@@ -13,7 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context";
 import { Github, LinkedIn } from "../ui/icons";
-export const ProfileDialog = () => {
+ const ProfileDialog = () => {
   const [activeTab, setActiveTab] = useState("general");
   const { user } = useAuth();
   return (
@@ -148,3 +148,5 @@ export const ProfileDialog = () => {
     </DialogContent>
   );
 };
+
+export default ProfileDialog;

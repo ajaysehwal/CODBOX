@@ -5,6 +5,7 @@ import { useAuth, useSocket } from "@/context";
 import { generateRandomToken } from "@/utils";
 import { MessageList } from "./messageList";
 import { MessageInput } from "./messageInput";
+import { Events } from "../constants";
 export type Message = {
   id: string;
   name: string;
@@ -42,7 +43,7 @@ export default function ChatSection() {
       timestamp: new Date(),
     };
 
-    socket?.emit("sendMessage", groupId, message);
+    socket?.emit(Events.CHAT.SEND, groupId, message);
     setText("");
   }, [socket, user, groupId, text]);
 
@@ -54,19 +55,23 @@ export default function ChatSection() {
     if (!socket || !groupId) return;
 
     const loadMessages = () => {
-      socket.emit("getMessages", groupId, (fetchedMessages: Message[]) => {
-        setMessages(fetchedMessages);
-        setIsLoading(false);
-        scrollToBottom();
-      });
+      socket.emit(
+        Events.CHAT.GET_MESSAGES,
+        groupId,
+        (fetchedMessages: Message[]) => {
+          setMessages(fetchedMessages);
+          setIsLoading(false);
+          scrollToBottom();
+        }
+      );
     };
 
     loadMessages();
-    socket.on("receiveMessage", handleReceiveMessage);
+    socket.on(Events.CHAT.RECEIVE, handleReceiveMessage);
 
     return () => {
-      socket.off("receiveMessage");
-      socket.off("AllGroupMessage");
+      socket.off(Events.CHAT.RECEIVE);
+      socket.off(Events.CHAT.GET_MESSAGES);
     };
   }, [socket, groupId, handleReceiveMessage, scrollToBottom]);
 

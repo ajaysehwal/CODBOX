@@ -2,17 +2,17 @@
 import React, { useEffect } from "react";
 import Home from "../page";
 import { redirect, useSearchParams, useRouter } from "next/navigation";
-import { useAuth, useSocket, useZegoEngine } from "@/context";
+import { useAuth, useSocket } from "@/context";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { useGroupsStore } from "@/zustand";
+import { Events } from "@/components/constants";
 export default function GroupPage() {
   const searchParams = useSearchParams();
   const groupId = searchParams.get("id") as string;
   const socket = useSocket();
   const router = useRouter();
   const { toast } = useToast();
-  const { zegoEngine } = useZegoEngine();
   const { user } = useAuth();
   const { setGroupId } = useGroupsStore();
   const Error = (error: string, desc?: string) => {
@@ -25,32 +25,16 @@ export default function GroupPage() {
   };
   const Rejoin = () => {
     socket?.emit(
-      "joinGroup",
+      Events.GROUP.JOIN,
       groupId,
       user,
       async (response: {
         success: boolean;
         error?: string;
-        AudioToken: string;
+        audioToken: string;
       }) => {
         if (!response.success) {
           Error("Please Join Group by entering token in  join other section");
-        } else {
-          console.log("token: " + response)
-          if (zegoEngine) {
-            await zegoEngine.loginRoom(groupId, response.AudioToken, {
-              userID: user?.uid as string,
-              userName: user?.email as string,
-            });
-            const localStream = await zegoEngine.createZegoStream({
-              camera: { audio: true, video: false },
-              audioBitrate: 192,
-            });
-            zegoEngine.startPublishingStream(
-              `${user?.uid}_stream`,
-              localStream
-            );
-          }
         }
       }
     );
@@ -60,7 +44,7 @@ export default function GroupPage() {
   }
   useEffect(() => {
     if (socket) {
-      socket.emit("ValidateGroup", groupId, (isValid: boolean) => {
+      socket.emit(Events.GROUP.VALIDATE, groupId, (isValid: boolean) => {
         if (!isValid) {
           Error("Group is not exist");
           setTimeout(() => {
@@ -73,7 +57,7 @@ export default function GroupPage() {
       });
     }
     return () => {
-      socket?.off("ValidateGroup");
+      socket?.off(Events.GROUP.VALIDATE);
     };
   }, [socket, groupId, router]);
   return <Home />;

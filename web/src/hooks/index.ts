@@ -6,3 +6,4 @@ export * from "./useCompilation";
 export * from "./useDebounce";
 export * from "./useCodeFiles";
 export * from "./useMousePosition";
+export * from "./useUserEditor"

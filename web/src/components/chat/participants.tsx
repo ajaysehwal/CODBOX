@@ -13,6 +13,7 @@ import {
 import { SendHorizontal, Users, Crown } from "lucide-react";
 import { Button } from "../ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Events } from "../constants";
 
 interface Response {
   success: boolean;
@@ -57,12 +58,12 @@ export default function GroupParticipants() {
     if (!socket || !groupId) return;
 
     socket.emit("getMembersList", groupId, handleGetMembersList);
-    socket.on("joined", handleJoined);
-    socket.on("leaved", handleLeaved);
+    socket.on(Events.GROUP.MEMBER_JOINED, handleJoined);
+    socket.on(Events.GROUP.MEMBER_LEFT, handleLeaved);
 
     return () => {
-      socket.off("joined", handleJoined);
-      socket.off("leaved", handleLeaved);
+      socket.off(Events.GROUP.MEMBER_JOINED, handleJoined);
+      socket.off(Events.GROUP.MEMBER_LEFT, handleLeaved);
     };
   }, [
     socket,

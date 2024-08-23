@@ -9,6 +9,7 @@ import { User } from "firebase/auth";
 import { useGroupsStore } from "@/zustand";
 import { Group } from "../interface";
 import { Spinner } from "../ui/spinner";
+import { Events } from "../constants";
 
 interface Response {
   success: boolean;
@@ -30,7 +31,7 @@ export const CreateGroup = ({
   const createGroup = useCallback(() => {
     setCreateLoad(false);
     const id = setTimeout(() => {
-      socket?.emit("createGroup", user, async (response: Response) => {
+      socket?.emit(Events.GROUP.CREATE, user, async (response: Response) => {
         console.log(response);
         if (response.success) {
           const group = response.group;

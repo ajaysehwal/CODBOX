@@ -1,151 +1,103 @@
-import { useEffect, useState, useCallback } from "react";
-import { useAuth } from "../context";
-import { useUserFileStore } from "../zustand";
-import { GET, POST, PUT } from "../lib/api";
-import { usePathname, useSearchParams } from "next/navigation";
-import { toast, ToastOptions } from "react-toastify";
-
-interface ApiResponse<T> {
-  data: T | null;
-  error: { message: string } | null;
+import { useAuth, useSocket } from "@/context";
+import { useCallback, useEffect, useState } from "react";
+import { Events } from "@/components/constants";
+import { create } from "zustand";
+import { useRouter } from "next/navigation";
+import { useUserEditor } from "./useUserEditor";
+import { useGroupEditor } from "./useGroupEdior";
+interface File {
+  filename: string;
+  content: string;
 }
 
-export function useCodeFile() {
+interface SelectedFile {
+  file: File | null;
+  setFile: (file: File) => void;
+}
+export const useSelectedFile = create<SelectedFile>((set) => ({
+  file: null,
+  setFile: (file: File) => set({ file }),
+}));
+
+interface CreateFileResponse {
+  success: boolean;
+  message: string;
+}
+
+const useFiles = (isGroup: boolean, groupId?: string) => {
+  const [files, setFiles] = useState<string[]>([]);
+  const { setCode } = isGroup ? useGroupEditor() : useUserEditor();
+
+  const socket = useSocket();
+  const { file, setFile } = useSelectedFile();
   const { user } = useAuth();
-  const {
-    selectedFile,
-    setSelectedFile,
-    addNewFile,
-    setFiles,
-    setPersonalCode,
-    personalCode,
-  } = useUserFileStore();
-  const [fetchingContent, setFetchingContent] = useState<boolean>(false);
-  const [createLoad, setCreateLoad] = useState<boolean>(false);
-  const searchParams = useSearchParams();
-  const file = searchParams.get("file") as string;
+  const router = useRouter();
+  const [createLoad, setcreateLoad] = useState<boolean>(false);
+  const create = useCallback(
+    (filename: string) => {
+      setcreateLoad(true);
+      const event = isGroup
+        ? Events.GROUP.CREATE_FILE
+        : Events.USER.CREATE_FILE;
+      const ID = isGroup ? groupId : user?.uid;
 
-  const toastOptions: ToastOptions = {
-    autoClose: 6000,
-    hideProgressBar: false,
-    position: "top-left",
-    pauseOnHover: true,
-    progress: 0.2,
-  };
+      socket?.emit(
+        event,
+        ...[ID, filename],
+        (_: any, response: CreateFileResponse) => {
+          if (response.success) {
+            setFiles((prev) => [...prev, filename]);
+            setcreateLoad(false);
+            selectFile(filename);
+          } else {
+            setcreateLoad(false);
 
-  const handleError = useCallback(
-    (error: string) => {
-      toast.error(error, toastOptions);
-    },
-    [toastOptions]
-  );
-
-  const createNewFile = useCallback(
-    async (filename: string) => {
-      setCreateLoad(true);
-      try {
-        const result: ApiResponse<{ filename: string }> = await POST(
-          `/file/create`,
-          {
-            userId: user?.uid,
-            content: `// ${filename}`,
-            filename,
+            console.error("File creation failed:", response.message);
           }
-        );
-        if (result.data) {
-          addNewFile(filename);
-          toast.success("File created successfully", toastOptions);
-        } else {
-          handleError(result.error?.message || "Failed to create file");
         }
-      } catch (error) {
-        handleError("An unexpected error occurred while creating the file");
-      } finally {
-        setCreateLoad(false);
-      }
+      );
     },
-    [user?.uid, addNewFile, handleError, toastOptions]
+    [socket, isGroup, groupId]
   );
 
-  const getAllFiles = useCallback(
-    async (userId: string) => {
-      try {
-        const result: ApiResponse<{ files: string[] }> = await GET(
-          `file/${userId}`
-        );
-        if (result.data) {
-          setFiles(result.data.files);
-        } else {
-          handleError(result.error?.message || "Failed to fetch files");
-        }
-      } catch (error) {
-        handleError("An unexpected error occurred while fetching files");
-      }
-    },
-    [setFiles, handleError]
-  );
-
-  const getFileContent = useCallback(
-    async (filename: string) => {
-      setFetchingContent(true);
-      try {
-        const result: ApiResponse<{ content: string }> = await GET(
-          `/file/${user?.uid}/${filename}`
-        );
-        if (result.data) {
-          setPersonalCode(result.data.content);
-        } else {
-          handleError(result.error?.message || "Failed to fetch file content");
-        }
-      } catch (error) {
-        handleError("An unexpected error occurred while fetching file content");
-      } finally {
-        setFetchingContent(false);
-      }
-    },
-    [user?.uid, setPersonalCode, handleError]
-  );
-
-  const saveCode = useCallback(
-    async (code: string) => {
-      setFetchingContent(true);
-      try {
-        const result: ApiResponse<{ success: boolean }> = await PUT(
-          `/file/update/${user?.uid}/${selectedFile}`,
-          { code }
-        );
-        if (!result.data) {
-          handleError(result.error?.message || "Failed to save code");
-        }
-      } catch (error) {
-        handleError("An unexpected error occurred while saving the code");
-      } finally {
-        setFetchingContent(false);
-      }
-    },
-    [user?.uid, selectedFile]
-  );
+  const getFiles = useCallback(() => {
+    const event = isGroup ? Events.GROUP.GET_FILES : Events.USER.GET_FILES;
+    const ID = isGroup ? groupId : user?.uid;
+    socket?.emit(event, ID, (_: any, files: string[]) => {
+      setFiles(files);
+    });
+  }, [socket, isGroup, groupId]);
 
   useEffect(() => {
-    if (user?.uid) {
-      getAllFiles(user.uid);
-    }
-  }, [user?.uid]);
+    getFiles();
+    return () => {
+      socket?.off(Events.GROUP.GET_FILES);
+      socket?.off(Events.USER.GET_FILES);
+    };
+  }, [getFiles]);
 
-  useEffect(() => {
-    if (user?.uid) {
-      getFileContent(file || selectedFile);
-    }
-  }, [file, selectedFile, user?.uid]);
+  const selectFile = useCallback(
+    (filename: string) => {
+      const ID = isGroup ? groupId : user?.uid;
+      const event = isGroup
+        ? Events.GROUP.GET_FILE_CONTENT
+        : Events.USER.GET_FILE_CONTENT;
 
-  return {
-    personalCode,
-    createNewFile,
-    getAllFiles,
-    createLoad,
-    getFileContent,
-    fetchingContent,
-    setPersonalCode,
-    saveCode,
-  };
-}
+      socket?.emit(event, ...[ID, filename], (_: any, content: string) => {
+        console.log(content, filename);
+        if (_) {
+          router.push("/");
+        } else {
+          setFile({ filename, content });
+          setCode(content);
+        }
+      });
+    },
+    [socket, isGroup, groupId]
+  );
+
+  return { create, files, selectFile, selectedFile: file, createLoad };
+};
+
+export const useUserFiles = () => useFiles(false);
+export const useGroupFiles = (groupId: string) => useFiles(true, groupId);

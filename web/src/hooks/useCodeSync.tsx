@@ -2,13 +2,14 @@ import { SetStateAction, useCallback, useState } from "react";
 import * as monaco from "monaco-editor";
 import { Socket } from "socket.io-client";
 import { CodeChange } from "@/components/interface";
+import { useSocket } from "@/context";
 
 export const useCodeSync = (
-  socket: Socket | null,
   groupId: string,
   editorRef: React.RefObject<monaco.editor.IStandaloneCodeEditor>,
   setCode: React.Dispatch<SetStateAction<string>>
 ) => {
+  const socket = useSocket();
   const handleCodeUpdate = (response: {
     updateCode: string;
     change: CodeChange;

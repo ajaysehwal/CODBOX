@@ -18,7 +18,8 @@ import { Trash2, Sun, Moon, Globe, Code, RefreshCw, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "../ui/slider";
 
-export const SettingsDialog = () => {
+
+const SettingsDialog = () => {
   const [theme, setTheme] = useState("system");
   const [fontSize, setFontSize] = useState(14);
   const [notifications, setNotifications] = useState(true);
@@ -154,3 +155,6 @@ export const SettingsDialog = () => {
     </DialogContent>
   );
 };
+
+
+export default SettingsDialog;

@@ -39,51 +39,24 @@ interface UserFile {
   personalCode: string;
   setPersonalCode: (personalCode: string) => void;
 }
-export const useUserFileStore = create<UserFile>((set) => ({
-  files: [],
-  setFiles: (files: string[]) => set({ files }),
-  selectedFile: "index.js",
-  setSelectedFile: (selectedFile: string) => set({ selectedFile }),
-  addNewFile: (file: string) =>
-    set((state) => {
-      const isExist = state.files.some((el) => el === file);
-      if (!isExist) {
-        return { files: [...state.files, file] };
-      }
-      return state;
-    }),
-  removeFile: (fileId: number) =>
-    set((state) => ({
-      files: state.files.filter((_, i) => i !== fileId),
-    })),
-  personalCode: "",
-  setPersonalCode: (personalCode: string) => set({ personalCode }),
-}));
 
-interface BoxStore {
-  isBoxOpen: boolean;
-  setBoxOpen: (open: boolean) => void;
-}
-export const useBoxStore = create<BoxStore>((set) => ({
-  isBoxOpen: false,
-  setBoxOpen: (isBoxOpen: boolean) => set({ isBoxOpen }),
-}));
-
-interface EditorToogle {
+interface ToggleStore {
+  isChatOpen: boolean;
+  setChatOpen: (open: boolean) => void;
   isEditorOpen: boolean;
   setEditorOpen: (isEditorOpen: boolean) => void;
+  isdrawerOpen: boolean;
+  setIsDrawerOpen: (drawerOpen: boolean) => void;
+  isOpenSearchBox: boolean;
+  setIsOpenSearchBox: (isOpenSearchBox: boolean) => void;
 }
-
-export const useEditorToggle = create<EditorToogle>((set) => ({
+export const useToggleStore = create<ToggleStore>((set) => ({
+  isChatOpen: false,
+  setChatOpen: (isChatOpen: boolean) => set({ isChatOpen }),
   isEditorOpen: false,
   setEditorOpen: (isEditorOpen: boolean) => set({ isEditorOpen }),
-}));
-
-interface DrawerStore {
-  drawerOpen: boolean;
-  setDrawerOpen: (drawerOpen: boolean) => void;
-}
-export const useDrawerStore = create<DrawerStore>((set) => ({
-  drawerOpen: false,
-  setDrawerOpen: (drawerOpen: boolean) => set({ drawerOpen }),
+  isdrawerOpen: false,
+  setIsDrawerOpen: (isdrawerOpen: boolean) => set({ isdrawerOpen }),
+  isOpenSearchBox: false,
+  setIsOpenSearchBox: (isOpenSearchBox: boolean) => set({ isOpenSearchBox }),
 }));

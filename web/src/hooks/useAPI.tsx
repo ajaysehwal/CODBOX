@@ -1,19 +1,50 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { GET, POST, PUT, DELETE, ApiResponse } from "../lib/api";
-import { AxiosRequestConfig } from "axios";
+import { AxiosRequestConfig, AxiosError } from "axios";
 
 interface ApiError {
   message: string;
+  code?: string;
+  details?: any;
 }
 
-interface UseApiState<T> extends ApiResponse<T> {
-  isLoading: boolean;
+interface UseApiState<T> {
+  data: T | null;
   error: ApiError | null;
+  isLoading: boolean;
+  isSuccess: boolean;
+}
+
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+
+const apiMethods = {
+  GET,
+  POST,
+  PUT,
+  DELETE,
+};
+
+function createApiError(error: unknown): ApiError {
+  if (error instanceof AxiosError) {
+    return {
+      message: error.message,
+      code: error.code,
+      details: error.response?.data,
+    };
+  }
+  if (error instanceof Error) {
+    return {
+      message: error.message,
+    };
+  }
+  return {
+    message: "An unknown error occurred",
+  };
 }
 
 export function useApi<T>(
-  method: "GET" | "POST" | "PUT" | "DELETE",
+  method: HttpMethod,
   url: string,
   body?: any,
   config?: AxiosRequestConfig
@@ -21,41 +52,45 @@ export function useApi<T>(
   const [state, setState] = useState<UseApiState<T>>({
     data: null,
     error: null,
-    isLoading: true,
+    isLoading: false,
+    isSuccess: false,
   });
 
   const [trigger, setTrigger] = useState(0);
 
-  const execute = useCallback(() => setTrigger((t) => t + 1), []);
+  const execute = useCallback((newBody?: any, newConfig?: AxiosRequestConfig) => {
+    setTrigger((t) => t + 1);
+    if (newBody !== undefined) body = newBody;
+    if (newConfig !== undefined) config = newConfig;
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
 
     const fetchData = async () => {
-      if (isMounted) setState((prev) => ({ ...prev, isLoading: true }));
+      if (!isMounted) return;
+
+      setState((prev) => ({ ...prev, isLoading: true, error: null }));
+
       try {
-        let response: ApiResponse<T>;
-        switch (method) {
-          case "GET":
-            response = await GET<T>(url, config);
-            break;
-          case "POST":
-            response = await POST<T>(url, body, config);
-            break;
-          case "PUT":
-            response = await PUT<T>(url, body, config);
-            break;
-          case "DELETE":
-            response = await DELETE<T>(url, config);
-            break;
+        const apiMethod = apiMethods[method];
+        const response: ApiResponse<T> = await apiMethod(url, body, config);
+
+        if (isMounted) {
+          setState({
+            data: response.data,
+            error: null,
+            isLoading: false,
+            isSuccess: true,
+          });
         }
-        if (isMounted) setState({ ...response, isLoading: false });
       } catch (error) {
         if (isMounted) {
           setState({
             data: null,
-            error: error instanceof Error ? { message: error.message } : { message: "An unknown error occurred" },
+            error: createApiError(error),
             isLoading: false,
+            isSuccess: false,
           });
         }
       }

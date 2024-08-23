@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "../ui/scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
 
-export const NotificationDialog = () => {
+const NotificationDialog = () => {
   const [notifications, setNotifications] = useState([
     {
       id: 1,
@@ -173,3 +173,6 @@ const NotificationItem = ({ notification }: any) => {
     </div>
   );
 };
+
+
+export default NotificationDialog;
