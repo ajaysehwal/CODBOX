@@ -11,8 +11,7 @@ import { useAuth } from "./AuthProvider";
 interface SocketContextType {
   socket: Socket | null;
 }
-export const SERVER_PORT = process.env
-  .NEXT_PUBLIC_WEB_SOCKET_SERVER_PORT as string;
+export const SERVER_PORT = process.env.NEXT_PUBLIC_WEB_SOCKET_SERVER as string;
 export const SocketContext = createContext<SocketContextType | null>(null);
 interface SocketProviderProps {
   children: ReactNode;
@@ -29,6 +28,10 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         extraHeaders: {
           "Content-Type": "application/json",
         },
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000,
+        randomizationFactor: 0,
       });
       socket.current?.on("connect", () => {
         console.log("connected to server");

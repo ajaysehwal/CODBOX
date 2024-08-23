@@ -11,12 +11,6 @@ interface Members {
   setNewGroupMember: (member: GroupUser) => void;
   removeMember: (memberId: string) => void;
 }
-interface UserFile {
-  files: string[];
-  setFiles: (files: string[]) => void;
-  selectedFile: string;
-  setSelectedFile: (selectedFile: string) => void;
-}
 export const useGroupsStore = create<Members>((set) => ({
   members: [],
   groupId: "",
@@ -36,18 +30,33 @@ export const useGroupsStore = create<Members>((set) => ({
     })),
 }));
 
-export const useUserFileStore = create<UserFile>((set) => ({
-  files: [],
-  setFiles: (files: string[]) => set({ files }),
-  selectedFile: "index.js",
-  setSelectedFile: (selectedFile: string) => set({ selectedFile }),
-}));
-
-interface BoxStore {
-  isBoxOpen: boolean;
-  setBoxOpen: (open: boolean) => void;
+interface UserFile {
+  files: string[];
+  setFiles: (files: string[]) => void;
+  selectedFile: string;
+  setSelectedFile: (selectedFile: string) => void;
+  addNewFile: (file: string) => void;
+  personalCode: string;
+  setPersonalCode: (personalCode: string) => void;
 }
-export const useBoxStore = create<BoxStore>((set) => ({
-  isBoxOpen: false,
-  setBoxOpen: (isBoxOpen: boolean) => set({ isBoxOpen }),
+
+interface ToggleStore {
+  isChatOpen: boolean;
+  setChatOpen: (open: boolean) => void;
+  isEditorOpen: boolean;
+  setEditorOpen: (isEditorOpen: boolean) => void;
+  isdrawerOpen: boolean;
+  setIsDrawerOpen: (drawerOpen: boolean) => void;
+  isOpenSearchBox: boolean;
+  setIsOpenSearchBox: (isOpenSearchBox: boolean) => void;
+}
+export const useToggleStore = create<ToggleStore>((set) => ({
+  isChatOpen: false,
+  setChatOpen: (isChatOpen: boolean) => set({ isChatOpen }),
+  isEditorOpen: false,
+  setEditorOpen: (isEditorOpen: boolean) => set({ isEditorOpen }),
+  isdrawerOpen: false,
+  setIsDrawerOpen: (isdrawerOpen: boolean) => set({ isdrawerOpen }),
+  isOpenSearchBox: false,
+  setIsOpenSearchBox: (isOpenSearchBox: boolean) => set({ isOpenSearchBox }),
 }));

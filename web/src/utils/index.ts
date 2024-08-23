@@ -21,6 +21,7 @@ export const CopyText = (
   }
 };
 
+import { Language } from "@/components/interface";
 import { randomBytes } from "crypto";
 
 export function generateRandomToken(length: number = 16): string {
@@ -34,3 +35,36 @@ export function generateRandomToken(length: number = 16): string {
   }
   return token;
 }
+
+import { atom } from "recoil";
+
+export const backgroundAtom = atom<{ mode: "dark" | "light"; lines: boolean }>({
+  key: "bg",
+  default: {
+    mode: "light",
+    lines: true,
+  },
+});
+
+export const getLanguageByExtension = (filename: string): Language => {
+  const extension = filename.split(".").pop();
+
+  switch (extension) {
+    case "ts":
+      return "typescript";
+    case "js":
+      return "javascript";
+    case "jsx":
+      return "javascript";
+    case "tsx":
+      return "typescript";
+    case "py":
+      return "python";
+    case "java":
+      return "java";
+    case "cpp":
+      return "cpp";
+    default:
+      return "javascript";
+  }
+};

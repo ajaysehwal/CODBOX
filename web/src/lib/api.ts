@@ -1,25 +1,26 @@
-// api.ts
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, AxiosError, AxiosInstance } from "axios";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_SERVER as string;
+interface ApiError {
+  message: string;
+  code?: string | number;
+  details?: unknown;
+}
 
 export interface ApiResponse<T> {
   data: T | null;
-  error: string | null;
+  error: ApiError | null;
 }
 
-const api = axios.create({
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_SERVER as string;
+
+const api: AxiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
 });
 
 api.interceptors.request.use(
-  (config) => {
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (config) => config,
+  (error) => Promise.reject(error)
 );
 
 api.interceptors.response.use(
@@ -33,7 +34,7 @@ api.interceptors.response.use(
 async function apiRequest<T>(
   method: "GET" | "POST" | "PUT" | "DELETE",
   url: string,
-  body?: any,
+  body?: unknown,
   config?: AxiosRequestConfig
 ): Promise<ApiResponse<T>> {
   try {
@@ -45,21 +46,53 @@ async function apiRequest<T>(
     });
     return { data: response.data, error: null };
   } catch (error) {
-    return {
-      data: null,
-      error: error instanceof Error ? error.message : "An unknown error occurred",
+    const apiError: ApiError = {
+      message: "An unknown error occurred",
+      code: "UNKNOWN_ERROR",
     };
+
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError<unknown>;
+      if (axiosError.response) {
+        apiError.message =
+          (axiosError.response.data as { message?: string })?.message ||
+          axiosError.message;
+        apiError.code = axiosError.response.status;
+        apiError.details = axiosError.response.data;
+      } else if (axiosError.request) {
+        apiError.message = "No response received from the server";
+        apiError.code = "NO_RESPONSE";
+      } else {
+        apiError.message = axiosError.message;
+        apiError.code = "REQUEST_SETUP_ERROR";
+      }
+    } else if (error instanceof Error) {
+      apiError.message = error.message;
+      apiError.code = "UNEXPECTED_ERROR";
+    }
+
+    return { data: null, error: apiError };
   }
 }
 
-export const GET = <T>(url: string, config?: AxiosRequestConfig) =>
-  apiRequest<T>("GET", url, undefined, config);
+export const GET = <T>(
+  url: string,
+  config?: AxiosRequestConfig
+): Promise<ApiResponse<T>> => apiRequest<T>("GET", url, undefined, config);
 
-export const POST = <T>(url: string, body?: any, config?: AxiosRequestConfig) =>
-  apiRequest<T>("POST", url, body, config);
+export const POST = <T>(
+  url: string,
+  body?: unknown,
+  config?: AxiosRequestConfig
+): Promise<ApiResponse<T>> => apiRequest<T>("POST", url, body, config);
 
-export const PUT = <T>(url: string, body?: any, config?: AxiosRequestConfig) =>
-  apiRequest<T>("PUT", url, body, config);
+export const PUT = <T>(
+  url: string,
+  body?: unknown,
+  config?: AxiosRequestConfig
+): Promise<ApiResponse<T>> => apiRequest<T>("PUT", url, body, config);
 
-export const DELETE = <T>(url: string, config?: AxiosRequestConfig) =>
-  apiRequest<T>("DELETE", url, undefined, config);
+export const DELETE = <T>(
+  url: string,
+  config?: AxiosRequestConfig
+): Promise<ApiResponse<T>> => apiRequest<T>("DELETE", url, undefined, config);

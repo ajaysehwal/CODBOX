@@ -10,7 +10,7 @@ import {
 } from "../components/constants";
 import { useSearchParams } from "next/navigation";
 import { Language, Theme } from "@/components/interface";
-import SetupMonaco from "@/components/codeEditor/setUpMonaco";
+import SetupMonaco from "@/components/Editor/setUpMonaco";
 
 export function useCodeEditor() {
   const searchParams = useSearchParams();
@@ -32,7 +32,6 @@ export function useCodeEditor() {
     []
   );
   const { syncCode, emitCodeChange } = useCodeSync(
-    socket,
     groupId,
     editorRef,
     setCode

@@ -3,17 +3,19 @@ import "./globals.css";
 import { Inter as FontSans } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { AuthProvider, SocketProvider } from "@/context";
-import Navbar from "@/components/navbar/navbar";
+import Navbar from "@/components/navbar/Navbar";
 import { Toaster } from "@/components/ui/toaster";
 import dynamic from "next/dynamic";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const ZegoEngineProvider = dynamic(
-  () =>
-    import("../context/ZegoCloudProvider").then(
-      (mod) => mod.ZegoEngineProvider
-    ),
-  { ssr: false }
-);
+// const ZegoEngineProvider = dynamic(
+//   () =>
+//     import("../context/ZegoCloudProvider").then(
+//       (mod) => mod.ZegoEngineProvider
+//     ),
+//   { ssr: false }
+// );
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -40,11 +42,10 @@ export default function RootLayout({
       >
         <AuthProvider>
           <SocketProvider>
-            <ZegoEngineProvider>
-                <Navbar />
-                <Toaster />
-                {children}
-            </ZegoEngineProvider>
+              <Navbar />
+              <Toaster />
+              <ToastContainer />
+              {children}
           </SocketProvider>
         </AuthProvider>
       </body>
