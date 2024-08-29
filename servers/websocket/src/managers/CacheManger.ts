@@ -1,4 +1,5 @@
 import { OwnerType } from "../interface";
+import { Logger } from "../utils/logger";
 
 export interface FileUpdate {
   content: string;
@@ -14,13 +15,11 @@ export class Cache {
   private _cache: Map<string, OwnerFiles> = new Map();
   private maxCacheSize: number;
   private cleanupThreshold: number;
-
+  private logger: Logger;
   constructor(maxCacheSize: number = 1000, cleanupThreshold: number = 0.9) {
     this.maxCacheSize = maxCacheSize;
     this.cleanupThreshold = cleanupThreshold;
-    console.log(
-      `Cache initialized with max size: ${maxCacheSize}, cleanup threshold: ${cleanupThreshold}`
-    );
+    this.logger = new Logger();
     this.logCacheStats();
   }
 
@@ -34,9 +33,9 @@ export class Cache {
     if (!ownerFiles) {
       ownerFiles = { files: new Map(), lastAccessed: Date.now() };
       this._cache.set(key, ownerFiles);
-      console.log(`Created new OwnerFiles for ${key}`);
+      this.logger.info("Created new OwnerFiles for ${key}");
     } else {
-      console.log(`Retrieved existing OwnerFiles for ${key}`);
+      this.logger.info("Retrieved existing OwnerFiles for ${key}");
     }
     return ownerFiles;
   }
@@ -50,8 +49,7 @@ export class Cache {
     const ownerFiles = this.getOrCreateOwnerFiles(id, ownerType);
     ownerFiles.files.set(filename, { content, lastUpdated: Date.now() });
     ownerFiles.lastAccessed = Date.now();
-    console.log(this._cache)
-    console.log(`Updated file ${filename} for ${ownerType}:${id}`);
+    this.logger.info(`Updated file ${filename} for ${ownerType}:${id}`);
     this.cleanup();
   }
 
@@ -65,14 +63,12 @@ export class Cache {
       const fileUpdate = ownerFiles.files.get(filename);
       if (fileUpdate) {
         ownerFiles.lastAccessed = Date.now();
-        console.log(
+        this.logger.info(
           `Retrieved content for file ${filename} of ${ownerType}:${id}`
         );
-        console.log(fileUpdate)
         return fileUpdate.content;
       }
     }
-    console.log(`File ${filename} not found in cache for ${ownerType}:${id}`);
     return null;
   }
 
@@ -112,22 +108,22 @@ export class Cache {
     if (ownerFiles) {
       ownerFiles.files.delete(filename);
       ownerFiles.lastAccessed = Date.now();
-      console.log(`Removed file ${filename} for ${ownerType}:${id}`);
+      this.logger.info(`Removed file ${filename} for ${ownerType}:${id}`);
     }
   }
 
   clearOwnerFiles(id: string, ownerType: OwnerType): void {
     const key = this.getOwnerKey(id, ownerType);
     const deleted = this._cache.delete(key);
-    console.log(
+    this.logger.info(
       `Cleared all files for ${ownerType}:${id}. Deleted: ${deleted}`
     );
   }
 
   private cleanup(): void {
     if (this._cache.size > this.maxCacheSize * this.cleanupThreshold) {
-      console.log(
-        `Cache size (${this._cache.size}) exceeded threshold. Starting cleanup...`
+      this.logger.info(
+        `Cache size (${this._cache.size}) exceeded threshold. Starting cleanup..`
       );
       const sortedEntries = Array.from(this._cache.entries()).sort(
         (a, b) => a[1].lastAccessed - b[1].lastAccessed
@@ -138,18 +134,18 @@ export class Cache {
       );
       for (const [key] of entriesToRemove) {
         this._cache.delete(key);
-        console.log(`Removed ${key} from cache during cleanup`);
+        this.logger.info(`Removed ${key} from cache during cleanup`);
       }
-      console.log(`Cleanup complete. New cache size: ${this._cache.size}`);
+      this.logger.info(`Cleanup complete. New cache size: ${this._cache.size}`);
     }
   }
 
   logCacheStats(): void {
-    console.log(`Current cache size: ${this._cache.size}`);
-    console.log(`Max cache size: ${this.maxCacheSize}`);
-    console.log(`Cleanup threshold: ${this.cleanupThreshold}`);
+    this.logger.info(`Current cache size: ${this._cache.size}`);
+    this.logger.info(`Max cache size: ${this.maxCacheSize}`);
+    this.logger.info(`Cleanup threshold: ${this.cleanupThreshold}`);
     for (const [key, ownerFiles] of this._cache.entries()) {
-      console.log(
+      this.logger.info(
         `${key}: ${ownerFiles.files.size} files, Last accessed: ${new Date(
           ownerFiles.lastAccessed
         ).toISOString()}`
