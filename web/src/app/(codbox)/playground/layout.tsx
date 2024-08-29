@@ -1,21 +1,12 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "../../globals.css";
 import { Inter as FontSans } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { AuthProvider, SocketProvider } from "@/context";
 import Navbar from "@/components/navbar/Navbar";
 import { Toaster } from "@/components/ui/toaster";
-import dynamic from "next/dynamic";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-// const ZegoEngineProvider = dynamic(
-//   () =>
-//     import("../context/ZegoCloudProvider").then(
-//       (mod) => mod.ZegoEngineProvider
-//     ),
-//   { ssr: false }
-// );
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -23,7 +14,7 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "CodeXF | Collaborative Coding Made Easy",
+  title: "CODBOX | Playground",
   description: "Collaborative Coding Made Easy",
 };
 

@@ -13,9 +13,9 @@ export const DEFAULT_LANGUAGE = [
 export const DEFAULT_THEME = ["vs-dark", "light"] as const;
 
 export const DEFAULT_CODE = `/**
- * CodeXF - A platform for seamless collaboration in coding.
- * Connect, code, and create together in real-time!
- */` as const;
+   * CodeXF - A platform for seamless collaboration in coding.
+   * Connect, code, and create together in real-time!
+   */` as const;
 
 export const CANVAS_SIZE = {
   width: 3500,
@@ -36,7 +36,7 @@ export const Events = {
     GET_FILES: "u_files",
   },
   GROUP: {
-    GET_FILE_CONTENT: "g_fileContent",
+    GET_FILE_CONTENT: "g_fileConent",
     JOIN: "joinGroup",
     LEAVE: "leaveGroup",
     CREATE: "createGroup",
@@ -56,6 +56,7 @@ export const Events = {
     RECEIVE: "receiveMessage",
     GET_MESSAGES: "getMessages",
   },
+  DISCONNECT: "iamoffline",
 };
 
 import React from "react";

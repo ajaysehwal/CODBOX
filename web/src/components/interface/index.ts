@@ -134,3 +134,12 @@ export interface Move {
   timestamp: number;
   id: string;
 }
+
+
+export interface Result {
+  success: boolean;
+  output?: string;
+  error?: string;
+  executionTime?: number;
+  memoryUsage?: number;
+}

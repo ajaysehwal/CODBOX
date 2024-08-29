@@ -1,6 +1,11 @@
 import React, { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import {
+  usePathname,
+  useSearchParams,
+  useRouter,
+  useParams,
+} from "next/navigation";
 import Link from "next/link";
 import { Trash2, ArrowDownToLine, Plus, FileSearch } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -21,7 +26,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useGroupFiles, useUserFiles } from "@/hooks";
+import { useFiles } from "@/hooks";
 import { LanguageIconType, LANGUAGE_ICONS } from "../constants";
 type FileName = string;
 
@@ -123,7 +128,7 @@ const FileItem: React.FC<{ fileName: FileName; onSelect: () => void }> = ({
     className="flex items-center justify-between space-x-2 px-4 py-2 cursor-pointer transition-colors duration-200 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
     onSelect={onSelect}
   >
-    <Link href={`/?file=${fileName}`} className="flex items-center gap-2">
+    <Link href={`#${fileName}`} className="flex items-center gap-2">
       {getFileIcon(fileName)}
       <span className="text-1xl font-medium text-gray-700 dark:text-gray-300">
         {fileName}
@@ -134,33 +139,23 @@ const FileItem: React.FC<{ fileName: FileName; onSelect: () => void }> = ({
 );
 
 const Searching: React.FC<FileProjectDialogProps> = ({ isOpen, onClose }) => {
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
   const router = useRouter();
-  const groupId = searchParams.get("id") as string;
   const [searchQuery, setSearchQuery] = useState("");
-  const {
-    create: createUserFile,
-    selectFile,
-    files: userFiles,
-  } = useUserFiles();
-  const { create: createGroupFile, files: groupFiles } = useGroupFiles(groupId);
+  const { id: groupId } = useParams<{ id: string }>();
 
-  const allFiles = useMemo(() => {
-    return pathname === "/" ? userFiles : [...userFiles, ...groupFiles];
-  }, [pathname, userFiles, groupFiles]);
+  const { createFile, selectFile, files } = useFiles(
+    groupId ? "group" : "user"
+  );
 
   const filteredFiles = useMemo(() => {
-    return allFiles.filter((fileName) =>
+    return files.filter((fileName) =>
       fileName.toLowerCase().includes(searchQuery.toLowerCase())
     );
-  }, [allFiles, searchQuery]);
+  }, [files, searchQuery]);
 
   const handleCreateFile = () => {
     if (searchQuery.trim() !== "") {
-      pathname === "/"
-        ? createUserFile(searchQuery)
-        : createGroupFile(searchQuery);
+      createFile(searchQuery);
       setSearchQuery("");
     }
   };
@@ -172,7 +167,7 @@ const Searching: React.FC<FileProjectDialogProps> = ({ isOpen, onClose }) => {
         handleCreateFile();
       } else {
         selectFile(filteredFiles[0]);
-        router.replace(`/?file=${filteredFiles[0]}`);
+        router.push(`#${filteredFiles[0]}`);
         onClose();
       }
     }

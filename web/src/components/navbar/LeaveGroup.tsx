@@ -1,90 +1,92 @@
 "use client";
-import { useAuth, useSocket, useZegoEngine } from "@/context";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useToast } from "../ui/use-toast";
+
 import { useState, useCallback } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useAuth, useSocket } from "@/context";
+import { useToast } from "../ui/use-toast";
 import { ToastAction } from "../ui/toast";
 import { Button } from "../ui/button";
-import { useGroupsStore } from "@/zustand";
 import { Spinner } from "../ui/spinner";
+import { useGroupsStore } from "@/zustand";
 import { Events } from "../constants";
-interface Response {
+
+interface LeaveGroupResponse {
   success: boolean;
   error: string;
 }
-export const LeaveGroup = () => {
-  const searchParams = useSearchParams();
-  const groupId = searchParams.get("id") as string;
-  const router = useRouter();
-  const socket = useSocket();
-  const { toast } = useToast();
-  const [LeaveLoad, setLeaveLoad] = useState<boolean>(true);
-  const { zegoEngine } = useZegoEngine();
-  const { members, removeMember, setMembers } = useGroupsStore();
-  const { user } = useAuth();
-  const LeaveGroup = useCallback(
-    (groupId: string) => {
-      setLeaveLoad(false);
-      console.log(members.length === 1);
-      const id = setTimeout(() => {
-        try {
-          if (members.length === 1) {
-            socket?.emit("closeGroup", groupId, (result: boolean) => {
-              if (!result) {
-                Error("Error Occured while closing group");
-              } else {
-                setMembers([]);
-              }
-            });
-          } else {
-            socket?.emit(
-              Events.GROUP.LEAVE,
-              groupId,
-              user?.uid,
-              (response: Response) => {
-                if (!response.success) {
-                  Error(response.error);
-                }
-              }
-            );
-          }
-          router.push("/");
-          // disconnectAudio(groupId);
-        } catch (error) {
-          Error("Error Occured while leaving group");
-        } finally {
-          setLeaveLoad(true);
-        }
-      }, 500);
-      return () => clearTimeout(id);
-    },
 
-    [socket, router]
+export const LeaveGroup: React.FC = () => {
+  const router = useRouter();
+  const { id: groupId } = useParams<{ id: string }>();
+  const { socket } = useSocket();
+  const { toast } = useToast();
+  const [isLeaving, setIsLeaving] = useState<boolean>(false);
+  const { members, setMembers } = useGroupsStore();
+  const { user } = useAuth();
+
+  const showError = useCallback(
+    (error: string) => {
+      toast({
+        variant: "destructive",
+        title: error,
+        description: "Please return to home page manually",
+        action: <ToastAction altText="Try again">Try again</ToastAction>,
+      });
+    },
+    [toast]
   );
-  // const disconnectAudio = useCallback(
-  //   async (groupId: string) => {
-  //     if (zegoEngine && localStream) {
-  //       zegoEngine.destroyStream(localStream);
-  //       zegoEngine.logoutRoom(groupId);
-  //     }
-  //   },
-  //   [localStream, groupId, zegoEngine]
-  // );
-  const Error = (error: string) => {
-    return toast({
-      variant: "destructive",
-      title: error,
-      description: "Please return home page manually",
-      action: <ToastAction altText="Try again">Try again</ToastAction>,
+
+  const handleLeaveGroup = useCallback(() => {
+    setIsLeaving(true);
+
+    const leaveTimeout = setTimeout(() => {
+      try {
+        if (members.length === 1) {
+          handleCloseGroup();
+        } else {
+          handleMemberLeave();
+        }
+        router.push("/playground");
+      } catch (error) {
+        showError("Error occurred while leaving group");
+      } finally {
+        setIsLeaving(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(leaveTimeout);
+  }, [socket, router, members, groupId, user?.uid]);
+
+  const handleCloseGroup = () => {
+    socket?.emit("closeGroup", groupId, (result: boolean) => {
+      if (!result) {
+        showError("Error occurred while closing group");
+      } else {
+        setMembers([]);
+      }
     });
   };
+
+  const handleMemberLeave = () => {
+    socket?.emit(
+      Events.GROUP.LEAVE,
+      groupId,
+      user?.uid,
+      (response: LeaveGroupResponse) => {
+        if (!response.success) {
+          showError(response.error);
+        }
+      }
+    );
+  };
+
   return (
     <Button
-      disabled={!LeaveLoad}
-      onClick={() => LeaveGroup(groupId)}
+      disabled={isLeaving}
+      onClick={handleLeaveGroup}
       className="bg-gradient-to-r from-red-400 to-red-600 text-white hover:from-red-500 hover:to-red-700 flex gap-2 items-center justify-center px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      {!LeaveLoad ? (
+      {isLeaving ? (
         <>
           <Spinner />
           <span>Leaving...</span>

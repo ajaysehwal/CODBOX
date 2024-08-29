@@ -20,7 +20,7 @@ export function ResizableEditor({ header, editor, output }: ResizableEditorProps
       </ResizablePanel>
       <ResizableHandle />
       {output && (
-        <ResizablePanel defaultSize={25} className="border-gray-400">
+        <ResizablePanel defaultSize={25} className="border-gray-100">
           {output}
         </ResizablePanel>
       )}

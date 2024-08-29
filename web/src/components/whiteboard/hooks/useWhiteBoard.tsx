@@ -1,7 +1,7 @@
 import { useAuth, useSocket } from "@/context";
 import React, { useCallback, useEffect, useState } from "react";
 import { useCanvasRef } from "./useCanvasRef";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import {
   Pencil,
   Eraser,
@@ -34,9 +34,9 @@ export const useWhiteBoard = () => {
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [color, setColor] = useState<string>("#000000");
   const [activeTool, setActiveTool] = useState<string>("pencil");
-  const searchParams = useSearchParams();
-  const groupId = searchParams.get("id") as string;
-  const socket = useSocket();
+  const { id: groupId } = useParams<{ id: string }>();
+
+  const { socket } = useSocket();
   const { user } = useAuth();
   useEffect(() => {
     const canvas = canvasRef.current;

@@ -30,16 +30,6 @@ export const useGroupsStore = create<Members>((set) => ({
     })),
 }));
 
-interface UserFile {
-  files: string[];
-  setFiles: (files: string[]) => void;
-  selectedFile: string;
-  setSelectedFile: (selectedFile: string) => void;
-  addNewFile: (file: string) => void;
-  personalCode: string;
-  setPersonalCode: (personalCode: string) => void;
-}
-
 interface ToggleStore {
   isChatOpen: boolean;
   setChatOpen: (open: boolean) => void;
@@ -60,3 +50,6 @@ export const useToggleStore = create<ToggleStore>((set) => ({
   isOpenSearchBox: false,
   setIsOpenSearchBox: (isOpenSearchBox: boolean) => set({ isOpenSearchBox }),
 }));
+
+export * from "./FileStore";
+export * from "./EditorStore";

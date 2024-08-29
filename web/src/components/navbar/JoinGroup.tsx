@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useAuth, useSocket } from "@/context";
 import { useRouter } from "next/navigation";
+import { User } from "firebase/auth";
+import { motion, AnimatePresence } from "framer-motion";
+import { UsersIcon, ArrowRightIcon, ChevronDownIcon } from "lucide-react";
+
+import { useAuth, useSocket } from "@/context";
 import { useToast } from "../ui/use-toast";
 import { ToastAction } from "../ui/toast";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,26 +16,23 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { User } from "firebase/auth";
-import { UsersIcon, ArrowRightIcon, ChevronDownIcon } from "lucide-react";
 import { Events } from "../constants";
 
-interface Response {
-  success: boolean;
-  error: string;
-  token: string;
+interface JoinGroupProps {
+  Join: (groupId: string, user: User) => Promise<void>;
 }
 
-export const JoinGroup = ({
-  Join,
-}: {
-  Join: (groupId: string, user: User, audioToken: string) => Promise<void>;
-}) => {
+interface JoinResponse {
+  success: boolean;
+  error: string;
+}
+
+export const JoinGroup: React.FC<JoinGroupProps> = ({ Join }) => {
   const router = useRouter();
-  const socket = useSocket();
+  const { socket } = useSocket();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [joinLoad, setJoinLoad] = useState<boolean>(true);
+  const [isJoining, setIsJoining] = useState<boolean>(false);
   const [joiningToken, setJoiningToken] = useState<string>("");
 
   const showError = (error: string, desc?: string) => {
@@ -45,29 +45,31 @@ export const JoinGroup = ({
   };
 
   const handleJoinGroup = useCallback(() => {
-    if (joiningToken === "") {
+    if (!joiningToken) {
       showError("Invalid Token", "Please enter a valid token");
       return;
     }
-    setJoinLoad(false);
-    const id = setTimeout(() => {
+
+    setIsJoining(true);
+
+    const joinTimeout = setTimeout(() => {
       socket?.emit(
         Events.GROUP.JOIN,
         joiningToken,
         user,
-        async (response: Response) => {
+        async (response: JoinResponse) => {
           if (response.success) {
-            await Join(joiningToken, user as User, response.token);
-            router.push(`/group?id=${joiningToken}`);
+            await Join(joiningToken, user as User);
+            router.push(`/playground/g/${joiningToken}`);
           } else {
             showError(response.error);
-            setJoinLoad(true);
+            setIsJoining(false);
           }
         }
       );
     }, 1000);
 
-    return () => clearTimeout(id);
+    return () => clearTimeout(joinTimeout);
   }, [socket, router, joiningToken, user, Join]);
 
   return (
@@ -77,80 +79,119 @@ export const JoinGroup = ({
         <ChevronDownIcon className="ml-2 h-4 w-4" />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-80 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl">
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">
-            Join a Coding Group
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-            Enter the group code to join your friends
-          </p>
-          <div className="space-y-4">
-            <div className="relative">
-              <Input
-                placeholder="Enter group code"
-                value={joiningToken}
-                onChange={(e) => setJoiningToken(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500 focus:border-transparent"
-                onKeyPress={(e) => e.key === "Enter" && handleJoinGroup()}
-              />
-              <UsersIcon
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                size={18}
-              />
-            </div>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={joinLoad ? "join" : "joining"}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Button
-                  onClick={handleJoinGroup}
-                  disabled={!joinLoad || !joiningToken}
-                  className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 flex items-center justify-center px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out transform hover:scale-102 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {joinLoad ? (
-                    <>
-                      Join Group
-                      <ArrowRightIcon className="ml-2" size={18} />
-                    </>
-                  ) : (
-                    <div className="flex items-center">
-                      <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      Joining...
-                    </div>
-                  )}
-                </Button>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </motion.div>
+        <JoinGroupContent
+          joiningToken={joiningToken}
+          setJoiningToken={setJoiningToken}
+          isJoining={isJoining}
+          handleJoinGroup={handleJoinGroup}
+        />
       </DropdownMenuContent>
     </DropdownMenu>
   );
 };
+
+interface JoinGroupContentProps {
+  joiningToken: string;
+  setJoiningToken: (token: string) => void;
+  isJoining: boolean;
+  handleJoinGroup: () => void;
+}
+
+const JoinGroupContent: React.FC<JoinGroupContentProps> = ({
+  joiningToken,
+  setJoiningToken,
+  isJoining,
+  handleJoinGroup,
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: -20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
+  >
+    <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">
+      Join a Coding Group
+    </h3>
+    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+      Enter the group code to join your friends
+    </p>
+    <div className="space-y-4">
+      <div className="relative">
+        <Input
+          placeholder="Enter group code"
+          value={joiningToken}
+          onChange={(e) => setJoiningToken(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-500 focus:border-transparent"
+          onKeyPress={(e) => e.key === "Enter" && handleJoinGroup()}
+        />
+        <UsersIcon
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+          size={18}
+        />
+      </div>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={isJoining ? "joining" : "join"}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+        >
+          <JoinButton
+            isJoining={isJoining}
+            joiningToken={joiningToken}
+            handleJoinGroup={handleJoinGroup}
+          />
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  </motion.div>
+);
+
+interface JoinButtonProps {
+  isJoining: boolean;
+  joiningToken: string;
+  handleJoinGroup: () => void;
+}
+
+const JoinButton: React.FC<JoinButtonProps> = ({
+  isJoining,
+  joiningToken,
+  handleJoinGroup,
+}) => (
+  <Button
+    onClick={handleJoinGroup}
+    disabled={isJoining || !joiningToken}
+    className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700 flex items-center justify-center px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out transform hover:scale-102 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    {isJoining ? (
+      <div className="flex items-center">
+        <svg
+          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+          ></path>
+        </svg>
+        Joining...
+      </div>
+    ) : (
+      <>
+        Join Group
+        <ArrowRightIcon className="ml-2" size={18} />
+      </>
+    )}
+  </Button>
+);

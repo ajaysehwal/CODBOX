@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useAuth, useSocket } from "@/context";
 import { generateRandomToken } from "@/utils";
 import { MessageList } from "./messageList";
@@ -16,11 +16,10 @@ export type Message = {
   email: string;
 };
 export default function ChatSection() {
-  const socket = useSocket();
+  const { socket } = useSocket();
   const { user } = useAuth();
-  const searchParams = useSearchParams();
   const pathname = usePathname();
-  const groupId = searchParams.get("id") as string;
+  const { id: groupId } = useParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(true);
   const [text, setText] = useState<string>("");
   const [messages, setMessages] = useState<Message[]>([]);
