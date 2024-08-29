@@ -5,15 +5,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "xf:install": "concurrently \"cd web && pnpm install\" \"cd server && pnpm install\"",
-    "xf:dev": "concurrently \"pnpm run-web\" \"pnpm run-server\"",
+    "xf:install": "concurrently \"cd web && pnpm install\" \"cd servers/starter && pnpm install\"  \"cd servers/connections && pnpm install\"",
+    "xf:dev": "concurrently \"pnpm run-web\" \"pnpm run-coll\" \"yarn run-starter\"",
     "test": "echo \"Error: no test specified\" && exit 1",
     "run-web": "cd web && pnpm dev",
-    "run-server": "cd server && pnpm dev"
+    "run-coll": "cd servers/connections && pnpm dev",
+    "run-starter": "cd servers/starter && yarn dev"
   },
   "author": "Ajay Sehwal",
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^8.2.2"
-  }
+  },
+  "dependencies": {}
 }

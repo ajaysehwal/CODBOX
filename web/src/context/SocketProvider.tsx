@@ -19,8 +19,8 @@ interface SocketProviderProps {
   children: ReactNode;
 }
 
-const SERVER_PORT = process.env.NEXT_PUBLIC_WEB_SOCKET_SERVER as string;
-const COMPILING_SERVER_URL = "ws://localhost:4000";
+const SERVER_PORT = process.env.NEXT_PUBLIC_SERVER_001 as string;
+const COMPILING_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_002 as string;
 
 const SocketContext = createContext<SocketContextType | null>(null);
 
@@ -91,6 +91,5 @@ export const useSocket = () => {
   }
   return context;
 };
-
 
 export { SERVER_PORT };

@@ -8,13 +8,13 @@ const nextConfig = {
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "192462155746",
     NEXT_PUBLIC_FIREBASE_API_ID: "1:192462155746:web:acc5a7e299aa0f8e9493bb",
     NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: "G-1P928C258S",
-    NEXT_PUBLIC_WEB_SOCKET_SERVER: "http://localhost:8000",
-    //  NEXT_PUBLIC_WEB_SOCKET_SERVER_PORT: "https://ridiculous-fredra-codexf-9b142785.koyeb.app",
+    NEXT_PUBLIC_SERVER_001:
+      "https://bookish-space-chainsaw-x5w4x5rrp7vcvwqp-8080.app.github.dev",
+    NEXT_PUBLIC_SERVER_002:
+      "https://bookish-space-chainsaw-x5w4x5rrp7vcvwqp-5050.app.github.dev",
     NEXT_PUBLIC_ORIGIN: "http://localhost:3000",
     NEXT_PUBLIC_ZEGOCLOUD_APP_ID: "1843547935",
     NEXT_PUBLIC_ZEGOCLOUD_SERVER: "413a29ab68595d97b9f30beee5bee3fb",
-    // NEXT_PUBLIC_BASE_SERVER:"http://localhost:7000",
-    NEXT_PUBLIC_BASE_SERVER: "https://codexf-server-start.koyeb.app",
   },
   reactStrictMode: true,
   images: {
