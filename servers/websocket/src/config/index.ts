@@ -4,8 +4,6 @@ const env = process.env.NODE_ENV || "development";
 
 const requiredEnvVars = [
   "PORT",
-  "JUDGE0API_KEY",
-  "JUDGE0API_HOST",
   "AWS_ACCESS_KEY",
   "AWS_SECRET_ACCESS_KEY",
   "AWS_REGION",

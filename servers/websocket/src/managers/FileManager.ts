@@ -62,9 +62,9 @@ export class FilesManager {
     const key = this.getKey(ownerId, ownerType, filename);
     try {
       await this.redisStore.set(key, content);
-      console.log(`File update recorded in Redis: ${key}`);
+      this.logger.info(`File update recorded in Redis: ${key}`);
     } catch (error) {
-      console.log(
+      this.logger.error(
         `Failed to record file update to Redis: ${ownerId}/${filename}`,
         error
       );
