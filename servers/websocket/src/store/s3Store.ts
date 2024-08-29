@@ -1,28 +1,23 @@
 import {
-  S3Client,
   GetObjectCommand,
   PutObjectCommand,
   ListObjectsV2Command,
   HeadObjectCommand,
+  S3Client,
 } from "@aws-sdk/client-s3";
 import { Upload } from "@aws-sdk/lib-storage";
 import { Readable } from "stream";
-import { S3StoreProps } from "../interface";
+import { S3Response, S3Config } from "../interface";
+import { createS3Client } from "../services";
 
 export abstract class S3Store {
   protected s3Client: S3Client;
   protected bucketName: string;
   protected abstract basePath: string;
 
-  constructor(config: S3StoreProps) {
+  constructor(config: S3Config) {
     this.bucketName = config.bucketName;
-    this.s3Client = new S3Client({
-      region: config.region,
-      credentials: {
-        accessKeyId: config.accessKeyId,
-        secretAccessKey: config.secretAccessKey,
-      },
-    });
+    this.s3Client = createS3Client(config);
   }
 
   protected getS3Key(id: string, filename: string): string {
@@ -33,10 +28,7 @@ export abstract class S3Store {
     const folderKey = `${this.basePath}/${id}/`;
     try {
       await this.s3Client.send(
-        new HeadObjectCommand({
-          Bucket: this.bucketName,
-          Key: folderKey,
-        })
+        new HeadObjectCommand({ Bucket: this.bucketName, Key: folderKey })
       );
     } catch (error) {
       await this.s3Client.send(
@@ -48,15 +40,13 @@ export abstract class S3Store {
       );
     }
   }
+  
 
   protected async fileExists(id: string, filename: string): Promise<boolean> {
     const key = this.getS3Key(id, filename);
     try {
       await this.s3Client.send(
-        new HeadObjectCommand({
-          Bucket: this.bucketName,
-          Key: key,
-        })
+        new HeadObjectCommand({ Bucket: this.bucketName, Key: key })
       );
       return true;
     } catch (error) {
@@ -72,13 +62,8 @@ export abstract class S3Store {
     const key = this.getS3Key(id, filename);
     const upload = new Upload({
       client: this.s3Client,
-      params: {
-        Bucket: this.bucketName,
-        Key: key,
-        Body: content,
-      },
+      params: { Bucket: this.bucketName, Key: key, Body: content },
     });
-
     await upload.done();
   }
 
@@ -92,7 +77,7 @@ export abstract class S3Store {
       const response = await this.s3Client.send(command);
       return await this.streamToString(response.Body as Readable);
     } catch (error) {
-      console.error(`Error getting file from S3:`, error);
+      console.error(`Error getting file from S3: ${id}/${filename}`, error);
       throw new Error("Failed to get file content");
     }
   }
@@ -114,7 +99,7 @@ export abstract class S3Store {
       const response = await this.s3Client.send(command);
       return this.extractFilenames(response.Contents || []);
     } catch (error) {
-      console.error(`Error listing files from S3:`, error);
+      console.error(`Error listing files from S3: ${id}`, error);
       return [];
     }
   }
@@ -129,10 +114,10 @@ export abstract class S3Store {
     id: string,
     filename: string,
     content: string
-  ): Promise<{ success: boolean; message: string }>;
+  ): Promise<S3Response>;
   abstract updateFile(
     id: string,
     filename: string,
     content: string
-  ): Promise<{ success: boolean; message: string }>;
+  ): Promise<S3Response>;
 }

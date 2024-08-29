@@ -4,6 +4,7 @@ import os from "os";
 import { Logger } from "./utils/logger";
 import { Server } from "./server";
 import { WorkerManager } from "./managers/WorkerManager";
+import { Cache } from "./managers/CacheManger";
 
 const numCPUs = os.cpus().length;
 const PORT = process.env.PORT || 8000;
@@ -34,3 +35,4 @@ app.start().catch((error) => {
   console.error("Failed to start the application:", error);
   process.exit(1);
 });
+
