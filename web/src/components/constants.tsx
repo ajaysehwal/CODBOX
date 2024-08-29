@@ -36,7 +36,7 @@ export const Events = {
     GET_FILES: "u_files",
   },
   GROUP: {
-    GET_FILE_CONTENT: "g_fileConent",
+    GET_FILE_CONTENT: "g_fileContent",
     JOIN: "joinGroup",
     LEAVE: "leaveGroup",
     CREATE: "createGroup",
@@ -56,7 +56,7 @@ export const Events = {
     RECEIVE: "receiveMessage",
     GET_MESSAGES: "getMessages",
   },
-} as const;
+};
 
 import React from "react";
 import {

@@ -1,7 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { MessageEvent, GroupEvent, CodeEvents } from "./eventHandler";
 import { redis, sub, pub } from "./config/redis";
-import http from "http";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { WhiteBorardEvents } from "./eventHandler/whiteBoardEvents";
 
@@ -18,7 +17,7 @@ export class SocketProvider {
       transports: ["websocket", "polling"],
       cors: {
         origin: [
-          "https://codexf.vercel.app",
+          "https://codbox.vercel.app",
           process.env.LOCAL_CLIENT as string,
         ],
         methods: ["GET", "POST"],

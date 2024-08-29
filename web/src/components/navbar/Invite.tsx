@@ -7,14 +7,13 @@ import {
 import { CopyText } from "@/utils";
 import { useRef } from "react";
 import { CopyButton } from "../ui/iconsbuttons";
-import { useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Button } from "../ui/button";
 import { UserPlus, Share } from "lucide-react";
 
 export const Invite = () => {
   const textRef = useRef<HTMLTextAreaElement | null>(null);
-  const searchParams = useSearchParams();
-  const groupId = searchParams.get("id") as string;
+  const { id: groupId } = useParams<{ id: string }>();
 
   return (
     <DropdownMenu>

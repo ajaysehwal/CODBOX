@@ -1,6 +1,6 @@
 import React, { useEffect, useCallback } from "react";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { User } from "firebase/auth";
 import { useAuth, useSocket } from "@/context";
 import { useGroupsStore, GroupUser } from "@/zustand";
@@ -24,11 +24,11 @@ interface Response {
 const MAX_DISPLAYED_MEMBERS = 4;
 
 export default function GroupParticipants() {
-  const socket = useSocket();
+  const { socket } = useSocket();
   const { setMembers, members, setNewGroupMember, removeMember } =
     useGroupsStore();
-  const searchParams = useSearchParams();
-  const groupId = searchParams.get("id") as string;
+  const { id: groupId } = useParams<{ id: string }>();
+
   const { user } = useAuth();
 
   const handleGetMembersList = useCallback(
@@ -57,7 +57,7 @@ export default function GroupParticipants() {
   useEffect(() => {
     if (!socket || !groupId) return;
 
-    socket.emit("getMembersList", groupId, handleGetMembersList);
+    socket.emit(Events.GROUP.GET_MEMBERS_LIST, groupId, handleGetMembersList);
     socket.on(Events.GROUP.MEMBER_JOINED, handleJoined);
     socket.on(Events.GROUP.MEMBER_LEFT, handleLeaved);
 

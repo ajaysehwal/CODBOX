@@ -3,7 +3,7 @@
 import React, { Suspense, lazy, useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useToggleStore } from "@/zustand";
-import {  Theme } from "../../interface";
+import { Theme } from "../../interface";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -16,6 +16,7 @@ const GroupParticipants = lazy(() => import("../../chat/participants"));
 
 interface EditorHeaderProps {
   theme: Theme;
+  isGroup: boolean;
   onThemeChange: (value: Theme) => void;
   onEvalCode: () => void;
   filename: string;
@@ -43,13 +44,13 @@ const HeaderButton: React.FC<{
 
 export const EditorHeader: React.FC<EditorHeaderProps> = ({
   theme,
+  isGroup,
   onThemeChange,
   onEvalCode,
   filename,
 }) => {
   const { isEditorOpen, setEditorOpen, setIsOpenSearchBox, isOpenSearchBox } =
     useToggleStore();
-  const pathname = usePathname();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -76,7 +77,10 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
     <div className="h-16 bg-[rgb(217,232,254)] w-full flex items-center justify-between px-4 shadow-sm">
       <ScrollArea className="w-full">
         <div className="flex items-center space-x-2 py-4">
-          <HeaderButton icon={getFileIcon(filename)} text={filename} />
+          <HeaderButton
+            icon={getFileIcon(filename || "index.js") || ""}
+            text={filename}
+          />
           <ThemeSelector onThemeChange={onThemeChange} theme={theme} />
           <HeaderButton
             onClick={() => setEditorOpen(!isEditorOpen)}
@@ -93,7 +97,7 @@ export const EditorHeader: React.FC<EditorHeaderProps> = ({
         </div>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
-      {pathname === "/group" && (
+      {isGroup && (
         <Suspense fallback={<Skeleton className="h-10 w-40" />}>
           <GroupParticipants />
         </Suspense>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MessageCircle, Bell, User, Settings } from "lucide-react";
 import { useToggleStore } from "@/zustand";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import ChatSection from "../chat/chat";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -86,9 +86,8 @@ const ChatBox: React.FC = () => (
 
 export default function Right() {
   const { isChatOpen, setChatOpen } = useToggleStore();
-  const searchParams = useSearchParams();
-  const groupId = searchParams.get("id") as string;
   const [isLoading, setIsLoading] = useState(true);
+  const { id: groupId } = useParams<{ id: string }>();
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);

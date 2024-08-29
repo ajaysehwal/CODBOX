@@ -53,10 +53,9 @@ export interface User {
 export interface Group {
   id: string;
   members: string[];
-  sourceCode: string;
   createdAt: string;
   membersInfo: User[];
-  board:string
+  board: string;
 }
 
 export interface Message {
@@ -68,7 +67,6 @@ export interface Message {
   avatar: string;
   email: string;
 }
-
 
 export interface CodeChange {
   delta: string;
@@ -86,8 +84,8 @@ export interface DrawData {
   lastX: number;
   lastY: number;
   color: string;
-  groupId:string;
-  userId:string;
+  groupId: string;
+  userId: string;
 }
 
 export interface S3StoreProps {
@@ -97,5 +95,18 @@ export interface S3StoreProps {
   secretAccessKey: string;
 }
 
+export type OwnerType = "user" | "group";
 
-export type OwnerType = "user" | "group"
+export interface S3Config {
+  accessKeyId: string;
+  secretAccessKey: string;
+  bucketName: string;
+  region: string;
+}
+
+export interface S3Response {
+  success: boolean;
+  message: string;
+}
+
+export type MemberType = "Host" | "Member" | "CoHost";

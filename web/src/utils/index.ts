@@ -68,3 +68,6 @@ export const getLanguageByExtension = (filename: string): Language => {
       return "javascript";
   }
 };
+
+export const getHash = () =>
+  typeof window !== "undefined" ? window.location.hash : undefined;

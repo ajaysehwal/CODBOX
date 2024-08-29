@@ -1,45 +1,62 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useToast } from "../components/ui/use-toast";
-import { evalCodeService } from "../services/evalCodeService";
-import { SubmissionResult, Language } from "../components/interface";
-import { useAuth } from "../context";
+import { useSocket } from "../context";
+import { Language, Result } from "@/components/interface";
+
+interface CompilationPayload {
+  code: string;
+  language: Language;
+  type: "request";
+}
 
 export function useCompilation(code: string, language: Language) {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { compilingSocket: ws } = useSocket();
+
   const [isOutputOpen, setIsOutputOpen] = useState(false);
-  const [compileResponse, setCompileResponse] =
-    useState<SubmissionResult | null>(null);
+  const [result, setResult] = useState<Result | null>(null);
   const [isCompiling, setIsCompiling] = useState(false);
 
-  const evalCode = useCallback(async () => {
-    setIsCompiling(true);
-    setIsOutputOpen(true);
-    try {
-      const result = await evalCodeService.evaluate(code, language, user?.uid);
-      if (!result.success) {
-        setIsOutputOpen(false);
-        toast({
-          variant: "destructive",
-          title: result.error || "Unknown error occurred",
-          description: "There was a problem with your request.",
-        });
-        return;
-      }
-      if (result.result) {
-        setCompileResponse(result.result);
-      }
-    } catch (error: any) {
+  const execute = useCallback(() => {
+    if (!ws) {
       toast({
-        variant: "destructive",
-        title: error.message || "Unknown error occurred",
-        description: "There was a problem with your request.",
+        title: "Error",
+        description: "WebSocket connection is not available.",
       });
-      console.error(error);
-    } finally {
-      setIsCompiling(false);
+      return;
     }
-  }, [code, language, user, toast]);
 
-  return { isOutputOpen, isCompiling, compileResponse, evalCode };
+    setIsCompiling(true);
+    setResult(null);
+    setIsOutputOpen(true);
+
+    const payload: CompilationPayload = { code, language, type: "request" };
+    ws.send(JSON.stringify(payload));
+  }, [code, language, ws, toast]);
+
+  useEffect(() => {
+    if (!ws) return;
+
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const response: Result = JSON.parse(event.data);
+        setResult(response);
+        setIsCompiling(false);
+      } catch (error) {
+        console.error("Failed to parse WebSocket message:", error);
+        toast({
+          title: "Error",
+          description: "Failed to process server response.",
+        });
+      }
+    };
+
+    ws.addEventListener("message", handleMessage);
+
+    return () => {
+      ws.removeEventListener("message", handleMessage);
+    };
+  }, [ws, toast]);
+
+  return { isOutputOpen, isCompiling, result, execute };
 }

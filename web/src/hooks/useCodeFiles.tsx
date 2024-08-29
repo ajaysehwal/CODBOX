@@ -1,103 +1,166 @@
 import { useAuth, useSocket } from "@/context";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Events } from "@/components/constants";
-import { create } from "zustand";
-import { useRouter } from "next/navigation";
-import { useUserEditor } from "./useUserEditor";
-import { useGroupEditor } from "./useGroupEdior";
-interface File {
-  filename: string;
-  content: string;
-}
+import { useFilesStore } from "@/zustand";
+import { useParams, useRouter } from "next/navigation";
+import { useEditor } from "./useEditor";
+import { useHashRoute } from "./usehashRoute";
 
-interface SelectedFile {
-  file: File | null;
-  setFile: (file: File) => void;
-}
-export const useSelectedFile = create<SelectedFile>((set) => ({
-  file: null,
-  setFile: (file: File) => set({ file }),
-}));
+type EventType = typeof Events.GROUP & typeof Events.USER;
+type FileContext = { type: "group"; groupId: string } | { type: "user" };
+type CreateFileResponse = { success: boolean; message: string };
 
-interface CreateFileResponse {
-  success: boolean;
-  message: string;
-}
+const getEventName = (context: FileContext, action: keyof EventType): string =>
+  context.type === "group"
+    ? Events.GROUP[action as keyof typeof Events.GROUP]
+    : Events.USER[action as keyof typeof Events.USER];
 
-const useFiles = (isGroup: boolean, groupId?: string) => {
-  const [files, setFiles] = useState<string[]>([]);
-  const { setCode } = isGroup ? useGroupEditor() : useUserEditor();
+const getId = (
+  context: FileContext,
+  userId: string | undefined
+): string | undefined => (context.type === "group" ? context.groupId : userId);
 
-  const socket = useSocket();
-  const { file, setFile } = useSelectedFile();
+export const useFiles = (pageType: "group" | "user") => {
+  const { socket } = useSocket();
+  const { id: groupId } = useParams<{ id: string }>();
   const { user } = useAuth();
   const router = useRouter();
-  const [createLoad, setcreateLoad] = useState<boolean>(false);
-  const create = useCallback(
-    (filename: string) => {
-      setcreateLoad(true);
-      const event = isGroup
-        ? Events.GROUP.CREATE_FILE
-        : Events.USER.CREATE_FILE;
-      const ID = isGroup ? groupId : user?.uid;
+  const { setCode } = useEditor();
+  const filename = useHashRoute();
 
-      socket?.emit(
-        event,
-        ...[ID, filename],
-        (_: any, response: CreateFileResponse) => {
-          if (response.success) {
-            setFiles((prev) => [...prev, filename]);
-            setcreateLoad(false);
-            selectFile(filename);
-          } else {
-            setcreateLoad(false);
+  const {
+    file,
+    setFile,
+    files,
+    setFiles,
+    createLoad,
+    setCreateLoad,
+    isLoading,
+    setIsLoading,
+    error,
+    setError,
+  } = useFilesStore();
 
-            console.error("File creation failed:", response.message);
-          }
-        }
-      );
-    },
-    [socket, isGroup, groupId]
+  const context: FileContext = useMemo(
+    () =>
+      pageType === "group"
+        ? { type: "group", groupId: groupId! }
+        : { type: "user" },
+    [pageType, groupId]
   );
 
-  const getFiles = useCallback(() => {
-    const event = isGroup ? Events.GROUP.GET_FILES : Events.USER.GET_FILES;
-    const ID = isGroup ? groupId : user?.uid;
-    socket?.emit(event, ID, (_: any, files: string[]) => {
-      setFiles(files);
-    });
-  }, [socket, isGroup, groupId]);
+  const emitSocketEvent = useCallback(
+    (eventName: string, ...args: any[]) =>
+      new Promise((resolve) =>
+        socket?.emit(eventName, ...args, (_: any, response: any) =>
+          resolve(response)
+        )
+      ),
+    [socket]
+  );
 
-  useEffect(() => {
-    getFiles();
-    return () => {
-      socket?.off(Events.GROUP.GET_FILES);
-      socket?.off(Events.USER.GET_FILES);
-    };
-  }, [getFiles]);
+  const handleError = useCallback(
+    (message: string, error: unknown) => {
+      console.error(message, error);
+      setError(`${message}: ${error}`);
+      setIsLoading(false);
+    },
+    [setError, setIsLoading]
+  );
+
+  const getFiles = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const event = getEventName(context, "GET_FILES");
+      const ID = getId(context, user?.uid);
+      const fetchedFiles = (await emitSocketEvent(event, ID)) as string[];
+      setFiles(fetchedFiles);
+    } catch (error) {
+      handleError("Error getting files", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    context,
+    user?.uid,
+    emitSocketEvent,
+    setFiles,
+    handleError,
+    setError,
+    setIsLoading,
+  ]);
+
+  const createFile = useCallback(
+    async (filename: string) => {
+      setCreateLoad(true);
+      setError(null);
+      try {
+        const event = getEventName(context, "CREATE_FILE");
+        const ID = getId(context, user?.uid);
+        const response = (await emitSocketEvent(
+          event,
+          ID,
+          filename
+        )) as CreateFileResponse;
+
+        if (response.success) {
+          setFiles([...files, filename]);
+          await selectFile(filename);
+          await getFiles();
+        } else {
+          throw new Error(response.message);
+        }
+      } catch (error) {
+        handleError("Error creating file", error);
+      } finally {
+        setCreateLoad(false);
+      }
+    },
+    [
+      context,
+      user?.uid,
+      emitSocketEvent,
+      setFiles,
+      getFiles,
+      handleError,
+      setError,
+    ]
+  );
 
   const selectFile = useCallback(
-    (filename: string) => {
-      const ID = isGroup ? groupId : user?.uid;
-      const event = isGroup
-        ? Events.GROUP.GET_FILE_CONTENT
-        : Events.USER.GET_FILE_CONTENT;
+    async (filename: string, initialgroupId?: string) => {
+      try {
+        const event = initialgroupId
+          ? Events.GROUP.GET_FILE_CONTENT
+          : getEventName(context, "GET_FILE_CONTENT");
+        const ID = initialgroupId ? initialgroupId : getId(context, user?.uid);
 
-      socket?.emit(event, ...[ID, filename], (_: any, content: string) => {
-        console.log(content, filename);
-        if (_) {
-          router.push("/");
-        } else {
-          setFile({ filename, content });
-          setCode(content);
-        }
-      });
+        const content = (await emitSocketEvent(event, ID, filename)) as string;
+        !initialgroupId && router.push(`#${filename}`);
+        setFile({ filename, content });
+        setCode(content);
+      } catch (error) {
+        handleError("Error selecting file", error);
+        router.push("/");
+      }
     },
-    [socket, isGroup, groupId]
+    [context, user?.uid, emitSocketEvent, setFile, setCode, router, handleError]
   );
 
-  return { create, files, selectFile, selectedFile: file, createLoad };
+  return useMemo(
+    () => ({
+      createFile,
+      files,
+      selectFile,
+      file,
+      createLoad,
+      setFile,
+      isLoading,
+      error,
+      getFiles,
+      context,
+    }),
+    [createFile, files, selectFile, file, createLoad, isLoading, error]
+  );
 };
-
-export const useUserFiles = () => useFiles(false);
-export const useGroupFiles = (groupId: string) => useFiles(true, groupId);

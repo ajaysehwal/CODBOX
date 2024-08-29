@@ -25,11 +25,12 @@ class Server {
   private app: express.Application;
   private httpServer: http.Server;
   private wss: WebSocket.Server;
-
+  private layer: Layers;
   constructor(private port: number, private logger: Logger) {
     this.app = express();
     this.httpServer = http.createServer(this.app);
     this.wss = new WebSocket.Server({ server: this.httpServer });
+    this.layer = new Layers();
   }
 
   public async start(): Promise<void> {
@@ -63,7 +64,10 @@ class Server {
   private async check() {
     try {
       const layer = new Layers();
-      const result = await layer.startProcess("console.log('hello world')", "javascript");
+      const result = await layer.startProcess(
+        "console.log('hello boy')",
+        "javascript"
+      );
       return result;
     } catch (err) {
       return (err as Error).message;
@@ -116,10 +120,20 @@ class Server {
 
   private handleWebSocketConnection = (ws: WebSocket): void => {
     this.logger.info(`New WebSocket connection: ${ws}`);
-    ws.on("message", this.handleCompileRequest);
+    ws.on("message", (payload) => this.handleCompileRequest(ws, payload));
   };
 
-  private handleCompileRequest = (payload: WebSocket.Data): void => {
+  private handleCompileRequest = async (
+    ws: WebSocket,
+    payload: WebSocket.Data
+  ): Promise<void> => {
+    const { code, language, type } = JSON.parse(payload.toString());
+    if (type !== "request") {
+      throw new Error("Invalid request type");
+    }
+    this.logger.info(`Received compilation request for language: ${language}`);
+    const result = await this.layer.startProcess(code, language);
+    ws.send(JSON.stringify(result));
     this.logger.info(`Received message: ${payload}`);
   };
 

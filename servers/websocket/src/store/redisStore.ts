@@ -1,4 +1,4 @@
-import { Redis, Pipeline } from "ioredis";
+import { Redis, Pipeline, RedisOptions } from "ioredis";
 import { pub, redis } from "../config/redis";
 import { IDataStore } from "../interface";
 
@@ -15,8 +15,12 @@ export class RedisStore implements IDataStore {
     return await this.client.get(key);
   }
 
-  async set(key: string, value: string): Promise<void> {
-    await this.client.set(key, value);
+  async set(key: string, value: string, ttlInSeconds?: number): Promise<void> {
+    if (ttlInSeconds) {
+      await this.client.set(key, value, "EX", ttlInSeconds);
+    } else {
+      await this.client.set(key, value);
+    }
   }
 
   async del(key: string): Promise<void> {

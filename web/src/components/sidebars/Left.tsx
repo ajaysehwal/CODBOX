@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Sheet,
   SheetContent,
@@ -12,37 +13,53 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToggleStore } from "@/zustand";
-import { useUserFiles, useGroupFiles } from "@/hooks";
-import { ArrowDownToLine, Plus, Trash2, FileSearch } from "lucide-react";
+import { useFiles } from "@/hooks";
+import {
+  ArrowDownToLine,
+  Plus,
+  Trash2,
+  FileSearch,
+  Folder,
+  User,
+} from "lucide-react";
 import { LANGUAGE_ICONS, LanguageIconType } from "@/components/constants";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-type File = string;
-type FileIconGetter = (fileName: string) => JSX.Element;
+// Type definitions
+type File = {
+  filename: string;
+  content: string;
+};
 
-interface FileDrawerProps {}
+type FileIconGetter = (fileName?: string) => React.ReactNode;
+
 interface FileSearchInputProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   handleCreateFile: () => void;
   isCreateDisabled: boolean;
 }
-interface FileListProps {
-  files: File[];
-  selectedFile: { filename: string; content: string } | null;
-  selectFile: (file: File) => void;
-  setIsDrawerOpen: (isOpen: boolean) => void;
-  getFileIcon: FileIconGetter;
-}
+
 interface FileListItemProps {
-  file: File;
+  file: string;
   isSelected: boolean;
-  selectFile: (file: File) => void;
+  selectFile: (file: string) => void;
   setIsDrawerOpen: (isOpen: boolean) => void;
   getFileIcon: FileIconGetter;
 }
 
+interface FileListProps {
+  files: string[];
+  selectedFile: File | null;
+  selectFile: (file: string) => void;
+  setIsDrawerOpen: (isOpen: boolean) => void;
+  getFileIcon: FileIconGetter;
+}
+
+interface FileDrawerProps {}
+
 // Helper Functions
-export const getFileIcon: FileIconGetter = (fileName = "") => {
+export const getFileIcon: FileIconGetter = (fileName = "index.js") => {
   const extension = fileName.split(".").pop()?.toLowerCase() || "";
   return (
     LANGUAGE_ICONS[extension as LanguageIconType] || (
@@ -58,7 +75,7 @@ const FileSearchInput: React.FC<FileSearchInputProps> = ({
   handleCreateFile,
   isCreateDisabled,
 }) => (
-  <div className="relative mb-8">
+  <div className="relative mb-6">
     <Input
       placeholder="Search or create files..."
       className="w-full bg-gray-100 dark:bg-gray-800 border-none rounded-full py-3 pl-5 pr-12 text-sm focus:ring-2 focus:ring-blue-400 dark:focus:ring-blue-600 transition-all duration-200"
@@ -78,7 +95,12 @@ const FileSearchInput: React.FC<FileSearchInputProps> = ({
 );
 
 const FileActions: React.FC = () => (
-  <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+  <motion.div
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="flex items-center space-x-1"
+  >
     <Button
       size="sm"
       variant="ghost"
@@ -93,7 +115,7 @@ const FileActions: React.FC = () => (
     >
       <Trash2 className="h-4 w-4" />
     </Button>
-  </div>
+  </motion.div>
 );
 
 const FileListItem: React.FC<FileListItemProps> = ({
@@ -103,7 +125,11 @@ const FileListItem: React.FC<FileListItemProps> = ({
   setIsDrawerOpen,
   getFileIcon,
 }) => (
-  <div
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.2 }}
     className={`group flex items-center justify-between py-3 px-4 mb-2 rounded-2xl transition-all duration-200 ease-in-out ${
       isSelected
         ? "bg-blue-50 dark:bg-blue-900/30"
@@ -111,7 +137,7 @@ const FileListItem: React.FC<FileListItemProps> = ({
     }`}
   >
     <Link
-      href={`?file=${file}`}
+      href={`#${file}`}
       onClick={() => {
         setIsDrawerOpen(false);
         selectFile(file);
@@ -131,8 +157,8 @@ const FileListItem: React.FC<FileListItemProps> = ({
         {file}
       </span>
     </Link>
-    <FileActions />
-  </div>
+    <AnimatePresence>{isSelected && <FileActions />}</AnimatePresence>
+  </motion.div>
 );
 
 const FileList: React.FC<FileListProps> = ({
@@ -142,41 +168,64 @@ const FileList: React.FC<FileListProps> = ({
   setIsDrawerOpen,
   getFileIcon,
 }) => (
-  <ScrollArea className="h-[calc(100vh-220px)] pr-4">
-    {files.map((file, i) => (
-      <FileListItem
-        key={i}
-        file={file}
-        isSelected={selectedFile?.filename === file}
-        selectFile={selectFile}
-        setIsDrawerOpen={setIsDrawerOpen}
-        getFileIcon={getFileIcon}
-      />
-    ))}
+  <ScrollArea className="h-[calc(100vh-280px)] pr-4">
+    <AnimatePresence>
+      {files.map((file, i) => (
+        <FileListItem
+          key={i}
+          file={file}
+          isSelected={selectedFile?.filename === file}
+          selectFile={selectFile}
+          setIsDrawerOpen={setIsDrawerOpen}
+          getFileIcon={getFileIcon}
+        />
+      ))}
+    </AnimatePresence>
   </ScrollArea>
 );
 
 const FileDrawer: React.FC<FileDrawerProps> = () => {
-  const searchParams = useSearchParams();
-  const groupId = searchParams.get("id") as string;
+  const { id: groupId } = useParams<{ id: string }>();
   const { isdrawerOpen, setIsDrawerOpen } = useToggleStore();
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<"group" | "user">("group");
 
-  const { files, selectFile, selectedFile, create } = groupId
-    ? useGroupFiles(groupId)
-    : useUserFiles();
+  const {
+    files: groupFiles,
+    selectFile: selectGroupFile,
+    file: groupFile,
+    createFile: createGroupFile,
+  } = useFiles("group");
+  const {
+    files: userFiles,
+    selectFile: selectUserFile,
+    file: userFile,
+    createFile: createUserFile,
+  } = useFiles("user");
 
-  const filteredFiles = useMemo(
+  const filteredGroupFiles = useMemo(
     () =>
-      files?.filter((file) =>
+      groupFiles?.filter((file) =>
         file.toLowerCase().includes(searchTerm.toLowerCase())
       ) || [],
-    [files, searchTerm]
+    [groupFiles, searchTerm]
+  );
+
+  const filteredUserFiles = useMemo(
+    () =>
+      userFiles?.filter((file) =>
+        file.toLowerCase().includes(searchTerm.toLowerCase())
+      ) || [],
+    [userFiles, searchTerm]
   );
 
   const handleCreateFile = () => {
     if (searchTerm) {
-      create(searchTerm);
+      if (groupId && activeTab === "group") {
+        createGroupFile(searchTerm);
+      } else {
+        createUserFile(searchTerm);
+      }
       setSearchTerm("");
     }
   };
@@ -189,29 +238,91 @@ const FileDrawer: React.FC<FileDrawerProps> = () => {
         onMouseEnter={() => setIsDrawerOpen(true)}
         onMouseLeave={() => setIsDrawerOpen(false)}
       >
-        <SheetHeader className="pb-8">
-          <SheetTitle className="text-4xl font-black tracking-tight text-gray-900 dark:text-white">
-            Code<span className="text-blue-500">XF</span>
-          </SheetTitle>
-          <SheetDescription className="text-sm font-medium text-gray-500 dark:text-gray-400">
-            {groupId ? "Group Collaboration" : "Personal Workspace"}
-          </SheetDescription>
-        </SheetHeader>
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <SheetHeader className="pb-6">
+            <SheetTitle className="text-4xl font-black tracking-tight text-gray-900 dark:text-white">
+              COD<span className="text-blue-500">BOX</span>
+            </SheetTitle>
+            <SheetDescription className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              {groupId ? "Group Collaboration" : "Personal Workspace"}
+            </SheetDescription>
+          </SheetHeader>
 
-        <FileSearchInput
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          handleCreateFile={handleCreateFile}
-          isCreateDisabled={filteredFiles.length > 0}
-        />
-
-        <FileList
-          files={filteredFiles}
-          selectedFile={selectedFile}
-          selectFile={selectFile}
-          setIsDrawerOpen={setIsDrawerOpen}
-          getFileIcon={getFileIcon}
-        />
+          {groupId ? (
+            <Tabs
+              defaultValue="group"
+              className="w-full"
+              onValueChange={(value) => setActiveTab(value as "group" | "user")}
+            >
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger
+                  value="group"
+                  className="flex items-center space-x-2"
+                >
+                  <Folder className="w-4 h-4" />
+                  <span>Group Files</span>
+                </TabsTrigger>
+                <TabsTrigger
+                  value="user"
+                  className="flex items-center space-x-2"
+                >
+                  <User className="w-4 h-4" />
+                  <span>My Files</span>
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="group">
+                <FileSearchInput
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  handleCreateFile={handleCreateFile}
+                  isCreateDisabled={filteredGroupFiles.length > 0}
+                />
+                <FileList
+                  files={filteredGroupFiles}
+                  selectedFile={groupFile}
+                  selectFile={selectGroupFile}
+                  setIsDrawerOpen={setIsDrawerOpen}
+                  getFileIcon={getFileIcon}
+                />
+              </TabsContent>
+              <TabsContent value="user">
+                <FileSearchInput
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
+                  handleCreateFile={handleCreateFile}
+                  isCreateDisabled={filteredUserFiles.length > 0}
+                />
+                <FileList
+                  files={filteredUserFiles}
+                  selectedFile={userFile}
+                  selectFile={selectUserFile}
+                  setIsDrawerOpen={setIsDrawerOpen}
+                  getFileIcon={getFileIcon}
+                />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <>
+              <FileSearchInput
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+                handleCreateFile={handleCreateFile}
+                isCreateDisabled={filteredUserFiles.length > 0}
+              />
+              <FileList
+                files={filteredUserFiles}
+                selectedFile={userFile}
+                selectFile={selectUserFile}
+                setIsDrawerOpen={setIsDrawerOpen}
+                getFileIcon={getFileIcon}
+              />
+            </>
+          )}
+        </motion.div>
       </SheetContent>
     </Sheet>
   );

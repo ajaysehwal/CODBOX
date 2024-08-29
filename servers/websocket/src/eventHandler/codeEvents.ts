@@ -1,117 +1,136 @@
 import { Socket } from "socket.io";
-import { CodeService } from "../services/code";
+import { CodeService } from "../services";
 import { CodeChange, OwnerType } from "../interface";
 import { Events } from "../constants";
-import { FileManager } from "../managers/FileManager";
-import { FileUpdateManager } from "../managers/FileUpdatesManager";
-import { RedisStore } from "../store/redisStore";
-import { Logger } from "../utils/logger";
+
+type CallbackFunction = (error: any, result?: any) => void;
 
 export class CodeEvents {
   private codeService: CodeService;
 
   constructor(private socket: Socket) {
-    const fileManager = new FileManager();
-    const fileUpdateManager = new FileUpdateManager(
-      new RedisStore(),
-      new Logger()
-    );
-    this.codeService = new CodeService(fileManager, fileUpdateManager);
-    this.setupEvents();
+    this.codeService = new CodeService();
+    const eventHandlers = this.getEventHandlers();
+    eventHandlers.forEach(({ event, handler }) => {
+      this.socket.on(event, handler);
+    });
+  }
+  private getEventHandlers() {
+    return [
+      {
+        event: Events.GROUP.CODE_CHANGE,
+        handler: this.handleCodeChange("group"),
+      },
+      {
+        event: Events.USER.CODE_CHANGE,
+        handler: this.handleCodeChange("user"),
+      },
+      { event: Events.GROUP.GET_FILES, handler: this.getFiles("group") },
+      { event: Events.USER.GET_FILES, handler: this.getFiles("user") },
+      {
+        event: Events.GROUP.GET_FILE_CONTENT,
+        handler: this.handleFileContent("group"),
+      },
+      {
+        event: Events.USER.GET_FILE_CONTENT,
+        handler: this.handleFileContent("user"),
+      },
+      {
+        event: Events.GROUP.CREATE_FILE,
+        handler: this.handleCreateFile("group"),
+      },
+      {
+        event: Events.USER.CREATE_FILE,
+        handler: this.handleCreateFile("user"),
+      },
+    ];
   }
 
-  private setupEvents(): void {
-    this.socket.on(Events.GROUP.CODE_CHANGE, this.handleCodeChange("group"));
-    this.socket.on(Events.USER.CODE_CHANGE, this.handleCodeChange("user"));
-    this.socket.on(Events.GROUP.GET_FILES, this.getFiles("group"));
-    this.socket.on(Events.USER.GET_FILES, this.getFiles("user"));
-    this.socket.on(Events.GROUP.GET_FILE_CONTENT, this.handleFileCode("group"));
-    this.socket.on(Events.USER.GET_FILE_CONTENT, this.handleFileCode("user"));
-    this.socket.on(Events.GROUP.CREATE_FILE, this.handleCreateFile("group"));
-    this.socket.on(Events.USER.CREATE_FILE, this.handleCreateFile("user"));
-  }
-
-  private handleFileCode(ownerType: OwnerType) {
-    return async (id: string, filename: string, callback: Function) => {
-      console.log(id, filename);
+  private handleFileContent =
+    (ownerType: OwnerType) =>
+    async (id: string, filename: string, callback: CallbackFunction) => {
       try {
-        const code =
-          ownerType === "group"
-            ? await this.codeService.getGroupFileCode(id, filename)
-            : await this.codeService.getUserFileCode(id, filename);
-        console.log(code);
-        callback(null, code);
+        const fileManager = await this.codeService.file();
+        const content = await fileManager.getFileContent(
+          id,
+          ownerType,
+          filename
+        );
+        if (content) {
+          callback(null, content);
+        } else {
+          callback("Error not find");
+        }
       } catch (error) {
+        console.log("find", error);
         callback(error);
       }
     };
-  }
 
-  private getFiles(ownerType: OwnerType) {
-    return async (id: string, callback: Function) => {
+  private getFiles =
+    (ownerType: OwnerType) =>
+    async (id: string, callback: CallbackFunction) => {
       try {
-        const files =
-          ownerType === "group"
-            ? await this.codeService.getGroupFiles(id)
-            : await this.codeService.getUserFiles(id);
-        console.log(id, files);
+        const fileManager = await this.codeService.file();
+        const files = await fileManager.listFiles(id, ownerType);
         callback(null, files);
       } catch (error) {
         callback(error);
       }
     };
-  }
 
-  private handleCodeChange(ownerType: OwnerType) {
-    return async (id: string, filename: string, change: CodeChange) => {
-      console.log(id,filename,change)
+  private handleCodeChange =
+    (ownerType: OwnerType) =>
+    async (id: string, filename: string, change: CodeChange) => {
+      console.log(id, filename, change);
       try {
+        const fileManager = await this.codeService.file();
+        await fileManager.recordFileUpdate(
+          id,
+          ownerType,
+          filename,
+          change.delta
+        );
+
         if (ownerType === "group") {
-          await this.codeService.updateGroupFileCode(
-            id,
-            filename,
-            change.delta
-          );
           this.broadcastCodeChange(id, filename, {
             change,
             updateCode: change.delta,
           });
-        } else {
-          await this.codeService.updateUserFileCode(id, filename, change.delta);
         }
       } catch (error) {
-        console.log(error);
+        console.log(
+          `Error updating file content for ${ownerType} ${id}:`,
+          error
+        );
       }
     };
-  }
 
   private broadcastCodeChange(
     groupId: string,
     filename: string,
     content: { change: CodeChange; updateCode: string }
   ): void {
-    this.socket.to(groupId).emit(Events.GROUP.CODE_CHANGE, filename, content);
+    this.socket
+      .to(groupId)
+      .emit(Events.GROUP.CODE_CHANGE, { filename, content });
   }
-  private handleCreateFile(owner: OwnerType) {
-    return async (id: string, filename: string, callback: Function) => {
-      console.log("creating", id, filename);
+
+  private handleCreateFile =
+    (ownerType: OwnerType) =>
+    async (id: string, filename: string, callback: CallbackFunction) => {
       try {
-        const { success, message } =
-          owner === "group"
-            ? await this.codeService.createGroupFile(
-                id,
-                filename,
-                `// lets start learning in ${id} group`
-              )
-            : await this.codeService.createUserFile(
-                id,
-                filename,
-                `console.log("Nice to meet you! -${id}")`
-              );
-        callback(null, { success, message });
+        const initialContent = `// Let's start learning in ${ownerType} ${id} - ${filename}`;
+        const fileManager = await this.codeService.file();
+        const result = await fileManager.createFile(
+          id,
+          ownerType,
+          filename,
+          initialContent
+        );
+        callback(null, result);
       } catch (error) {
         callback(error);
       }
     };
-  }
 }
