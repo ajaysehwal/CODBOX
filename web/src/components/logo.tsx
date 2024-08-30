@@ -1,57 +1,55 @@
 import { motion } from "framer-motion";
-import { FaCode } from "react-icons/fa";
+import { Code } from "lucide-react";
 
-const CubeLogo = () => {
+export const Logo: React.FC = () => {
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div
-        className="w-32 h-32 relative transform-3d"
-        style={{ perspective: "1000px" }}
+    <div className="w-[40px] h-[40px] [perspective:800px] m-auto">
+      <motion.div
+        className="w-full h-full relative [transform-style:preserve-3d]"
+        animate={{
+          rotateX: [0, 360],
+          rotateY: [0, 360],
+        }}
+        transition={{
+          duration: 20,
+          ease: "easeOut",
+          repeat: Infinity,
+        }}
       >
-        <motion.div
-          className="w-full h-full absolute"
-          animate={{ rotateY: 45, rotateX: -20 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          style={{ transformStyle: "preserve-3d" }}
-        >
-          {/* Front face */}
-          <div className="absolute w-full h-full bg-blue-500 flex items-center justify-center">
-            <FaCode className="text-white text-4xl" />
-          </div>
-
-          {/* Back face */}
+        {[...Array(6)].map((_, index) => (
           <div
-            className="absolute w-full h-full bg-blue-700"
-            style={{ transform: "translateZ(-32px) rotateY(180deg)" }}
+            key={index}
+            className={`absolute w-full h-full border border-blue-500 bg-blue-50 bg-opacity-20 rounded-sm`}
+            style={getFaceStyles(index)}
           />
+        ))}
 
-          {/* Left face */}
-          <div
-            className="absolute w-full h-full bg-blue-600"
-            style={{ transform: "translateX(-16px) rotateY(-90deg)" }}
-          />
-
-          {/* Right face */}
-          <div
-            className="absolute w-full h-full bg-blue-600"
-            style={{ transform: "translateX(16px) rotateY(90deg)" }}
-          />
-
-          {/* Top face */}
-          <div
-            className="absolute w-full h-full bg-blue-400"
-            style={{ transform: "translateY(-16px) rotateX(90deg)" }}
-          />
-
-          {/* Bottom face */}
-          <div
-            className="absolute w-full h-full bg-blue-400"
-            style={{ transform: "translateY(16px) rotateX(-90deg)" }}
-          />
-        </motion.div>
-      </div>
+        <div className="absolute w-full h-full flex items-center justify-center [transform-style:preserve-3d]">
+          <Code className="text-blue-500" size={28} />
+        </div>
+      </motion.div>
     </div>
   );
 };
 
-export default CubeLogo;
+const getFaceStyles = (index: number): React.CSSProperties => {
+  const common = {
+    backfaceVisibility: "visible" as const,
+  };
+  switch (index) {
+    case 0: // front
+      return { ...common, transform: "translateZ(20px)" };
+    case 1: // back
+      return { ...common, transform: "rotateY(180deg) translateZ(20px)" };
+    case 2: // right
+      return { ...common, transform: "rotateY(90deg) translateZ(20px)" };
+    case 3: // left
+      return { ...common, transform: "rotateY(-90deg) translateZ(20px)" };
+    case 4: // top
+      return { ...common, transform: "rotateX(-90deg) translateZ(20px)" };
+    case 5: // bottom
+      return { ...common, transform: "rotateX(90deg) translateZ(20px)" };
+    default:
+      return common;
+  }
+};

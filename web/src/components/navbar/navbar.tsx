@@ -1,6 +1,7 @@
 "use client";
-import React from "react";
-import { usePathname, useParams } from "next/navigation";
+
+import React, { useState } from "react";
+import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { User } from "firebase/auth";
 import { MessageCircleMore } from "lucide-react";
@@ -11,6 +12,12 @@ import { ToastAction } from "../ui/toast";
 import GoogleSignIn from "./signIn";
 import ChatSection from "../chat/chat";
 import { Button } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+
 const Navbar: React.FC = () => {
   const { toast } = useToast();
   const { id: groupId } = useParams<{ id: string }>();
@@ -58,7 +65,6 @@ const Navbar: React.FC = () => {
           {renderNavbarContent()}
         </div>
       </nav>
-      {groupId && <MobileChatSection />}
     </motion.header>
   );
 };
@@ -77,28 +83,34 @@ const GroupActions: React.FC = () => (
   <div className="flex items-center space-x-2">
     <Invite />
     <LeaveGroup />
-    <ChatButton />
+    <ChatDropdown />
   </div>
 );
 
-const ChatButton: React.FC = () => (
-  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-    <Button
-      variant="outline"
-      size="icon"
-      className="rounded-full p-2 border-2 border-blue-200 bg-white hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 ease-in-out shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600"
-    >
-      <MessageCircleMore className="w-6 h-6 text-blue-500 hover:text-blue-600 transition-colors duration-300 dark:text-blue-400 dark:hover:text-blue-300" />
-    </Button>
-  </motion.div>
+const ChatDropdown: React.FC = () => (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button
+        variant="outline"
+        size="icon"
+        className="rounded-full lg:hidden block p-2 border-2 border-blue-200 bg-white hover:bg-blue-50 hover:border-blue-300 transition-all duration-300 ease-in-out shadow-sm hover:shadow-md focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 dark:bg-gray-700 dark:border-gray-600 dark:hover:bg-gray-600"
+      >
+        <MessageCircleMore className="w-6 h-6 text-blue-500 hover:text-blue-600 transition-colors duration-300 dark:text-blue-400 dark:hover:text-blue-300" />
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent className="w-[400px]">
+      <MobileChatSection />
+    </DropdownMenuContent>
+  </DropdownMenu>
 );
 
 const MobileChatSection: React.FC = () => (
   <motion.div
     initial={{ height: 0, opacity: 0 }}
     animate={{ height: "auto", opacity: 1 }}
+    exit={{ height: 0, opacity: 0 }}
     transition={{ duration: 0.3 }}
-    className="lg:hidden md:hidden block"
+    className="lg:hidden"
   >
     <ChatSection />
   </motion.div>

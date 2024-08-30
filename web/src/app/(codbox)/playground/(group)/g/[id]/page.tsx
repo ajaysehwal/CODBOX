@@ -5,7 +5,7 @@ import { useAuth, useSocket } from "@/context";
 import { useToast } from "@/components/ui/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { Events } from "@/components/constants";
-import Home from "@/app/(codbox)/playground/page";
+import Playground from "@/app/(codbox)/playground/page";
 
 export default function GroupEnvironment() {
   const router = useRouter();
@@ -63,5 +63,5 @@ export default function GroupEnvironment() {
     };
   }, [socket, groupId, router]);
 
-  return <Home isGroup={true} groupId={groupId} />;
+  return <Playground />;
 }

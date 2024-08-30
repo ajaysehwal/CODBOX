@@ -17,7 +17,6 @@ export const useEditor = () => {
   const { members } = useGroupsStore();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const { code, setCode, isGroup, isHost, setIsHost } = useEditorStore();
-  console.log(members);
   useEffect(() => {
     useEditorStore.setState({
       isGroup: !!groupId,
@@ -44,7 +43,6 @@ export const useEditor = () => {
 
   const emitCodeChange = useCallback(
     (changes: CodeChange) => {
-      console.log("send code changes");
       if (!socket || !user) return;
       const event = isGroup
         ? Events.GROUP.CODE_CHANGE
